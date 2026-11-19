@@ -42,7 +42,7 @@ export default function OfficeScene(){
   desk(-11,-7.2,0);box(1.8,.34,.72,mats.fabric,-13.3,.36,-8.8);box(1.8,.55,.14,mats.fabric,-13.3,.68,-8.5);cyl(.42,.1,mats.oak,-11.1,.63,-9.2);cyl(.06,.55,mats.metal,-11.1,.31,-9.2);plant(-14.7,-9.4,.7);
   // Conference room: a real meeting table and six individual chairs.
   partition(8,-7,13,7);box(12.7,2.35,.045,mat('#a8c2cc',.22),8,1.25,-3.47);label('MEETING ROOM',8,-7);
-  box(5.2,.14,1.65,mats.oak,8,.88,-7.1);for(let x=6;x<=10;x+=1.35){chair(x,-8.35,0);chair(x,-5.85,Math.PI);}box(3.2,1.45,.08,mats.black,8,1.55,-10.15);box(2.9,1.15,.025,mats.screen,8,1.58,-10.1);
+  box(5.2,.14,1.65,mats.oak,8,.88,-7.1);for(let x=6;x<=10;x+=1.35){chair(x,-8.35,Math.PI);chair(x,-5.85,0);}box(3.2,1.45,.08,mats.black,8,1.55,-10.15);box(2.9,1.15,.025,mats.screen,8,1.58,-10.1);
   // Six separate compact employee desks; each desk has its own chair and monitor.
   const stations=[[-9,.4],[-3,.4],[3,.4],[9,.4],[-6,5],[6,5]];
   stations.forEach(([x,z])=>desk(x,z,0));
