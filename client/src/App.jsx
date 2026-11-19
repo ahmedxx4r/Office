@@ -4,12 +4,10 @@ import OfficeScene from './components/OfficeScene.jsx';
 const initialAgents = [
   {id:'gm',name:'Nour',role:'General Manager',avatar:'✦',status:'idle',skills:['Planning','Leadership','Operations']},
   {id:'research',name:'Atlas',role:'Researcher',avatar:'⌕',status:'idle',skills:['Research','Analysis','Reports']},
-  {id:'builder',name:'Nova',role:'Builder',avatar:'⌘',status:'idle',skills:['Development','Automation','Testing']},
-  {id:'copy',name:'Echo',role:'Copywriter',avatar:'✎',status:'idle',skills:['Writing','Content','Brand voice']},
-  {id:'media',name:'Pixel',role:'Media Buyer',avatar:'◈',status:'idle',skills:['Ads','Campaigns','Analytics']},
-  {id:'hr',name:'Mira',role:'HR Manager',avatar:'◎',status:'idle',skills:['Hiring','People','Training']},
-  {id:'accountant',name:'Ledger',role:'Accountant',avatar:'＄',status:'idle',skills:['Finance','Budgets','Reports']},
-  {id:'assistant',name:'Sage',role:'Executive Assistant',avatar:'✧',status:'idle',skills:['Scheduling','Organization','Follow-up']}
+  {id:'builder',name:'Nova',role:'Developer',avatar:'⌘',status:'idle',skills:['Development','Automation','Testing']},
+  {id:'copy',name:'Echo',role:'Content Specialist',avatar:'✎',status:'idle',skills:['Writing','Content','Brand voice']},
+  {id:'media',name:'Pixel',role:'Marketing Specialist',avatar:'◈',status:'idle',skills:['Ads','Campaigns','Analytics']},
+  {id:'hr',name:'Mira',role:'People Operations',avatar:'◎',status:'idle',skills:['Hiring','People','Training']}
 ];
 export default function App(){
  const [data,setData]=useState({agents:initialAgents,tasks:[],messages:[],meetings:[]});
