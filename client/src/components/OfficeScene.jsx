@@ -1,67 +1,101 @@
-import React,{useEffect,useRef} from 'react';
+import React,{useEffect,useRef,useState} from 'react';
 import * as THREE from 'three';
 import {OrbitControls} from 'three/examples/jsm/controls/OrbitControls.js';
 
-const team=[['Nour','#9b2634'],['Atlas','#6688b8'],['Nova','#4d9b83'],['Echo','#b66f8d'],['Pixel','#bd8c4d'],['Mira','#5d9eaa'],['Ledger','#8174a9'],['Sage','#78965b']];
+const team=[
+ {id:'gm',name:'Nour',role:'General Manager',color:'#9b2634',status:'Working'},
+ {id:'research',name:'Atlas',role:'Researcher',color:'#6688b8',status:'Working'},
+ {id:'builder',name:'Nova',role:'Developer',color:'#4d9b83',status:'Coffee break'},
+ {id:'copy',name:'Echo',role:'Content Specialist',color:'#b66f8d',status:'Working'},
+ {id:'media',name:'Pixel',role:'Marketing Specialist',color:'#bd8c4d',status:'In a meeting'},
+ {id:'hr',name:'Mira',role:'People Operations',color:'#5d9eaa',status:'Working'}
+];
+
 export default function OfficeScene(){
- const mount=useRef(null);
+ const mount=useRef(null),[cameraMode,setCameraMode]=useState('top'),[selected,setSelected]=useState(null);
  useEffect(()=>{
   const host=mount.current;if(!host)return;
-  const scene=new THREE.Scene();scene.background=new THREE.Color('#171512');
-  const camera=new THREE.PerspectiveCamera(34,1,.1,150);camera.position.set(22,31,35);
-  const renderer=new THREE.WebGLRenderer({antialias:true,powerPreference:'high-performance'});renderer.setPixelRatio(Math.min(window.devicePixelRatio||1,1.6));renderer.shadowMap.enabled=true;renderer.shadowMap.type=THREE.PCFSoftShadowMap;renderer.outputColorSpace=THREE.SRGBColorSpace;renderer.toneMapping=THREE.ACESFilmicToneMapping;renderer.toneMappingExposure=1.2;host.appendChild(renderer.domElement);
-  const controls=new OrbitControls(camera,renderer.domElement);controls.target.set(0,0,0);controls.enableDamping=true;controls.dampingFactor=.07;controls.maxPolarAngle=Math.PI*.47;controls.minDistance=20;controls.maxDistance=55;
-  scene.add(new THREE.HemisphereLight('#fff1df','#514538',2));const sun=new THREE.DirectionalLight('#ffe2bd',3);sun.position.set(-12,25,15);sun.castShadow=true;sun.shadow.mapSize.set(2048,2048);sun.shadow.camera.left=-23;sun.shadow.camera.right=23;sun.shadow.camera.top=23;sun.shadow.camera.bottom=-23;scene.add(sun);const fill=new THREE.DirectionalLight('#b8c9ff',.75);fill.position.set(18,12,-18);scene.add(fill);
-  const M=(c,r=.72)=>new THREE.MeshStandardMaterial({color:c,roughness:r});
-  const floor=M('#948575'),tile=M('#b4a48f'),wall=M('#332b25'),wood=M('#8b5b39'),wood2=M('#b47b4d'),gold=M('#c69a5e',.35),black=M('#191a1b'),screen=M('#1a2834',.22),cream=M('#e4d6bd'),fabric=M('#65564d'),red=M('#842a25'),green=M('#55724e'),skin=M('#bd8d70');
-  const box=(w,h,d,ma,x,y,z,p=scene)=>{const o=new THREE.Mesh(new THREE.BoxGeometry(w,h,d),ma);o.position.set(x,y,z);o.castShadow=true;o.receiveShadow=true;p.add(o);return o;};
-  const cyl=(r,h,ma,x,y,z,p=scene)=>{const o=new THREE.Mesh(new THREE.CylinderGeometry(r,r,h,18),ma);o.position.set(x,y,z);o.castShadow=true;o.receiveShadow=true;p.add(o);return o;};
-  const sphere=(r,ma,x,y,z,p=scene)=>{const o=new THREE.Mesh(new THREE.SphereGeometry(r,16,12),ma);o.position.set(x,y,z);o.castShadow=true;p.add(o);return o;};
-  const plant=(x,z,s=.8)=>{cyl(.27*s,.42*s,wood,x,.21*s,z);for(let i=0;i<6;i++){const l=new THREE.Mesh(new THREE.ConeGeometry(.13*s,.85*s,8),M('#47734c'));l.position.set(x+Math.sin(i*2.4)*.18*s,.75*s,z+Math.cos(i*2.4)*.18*s);l.rotation.z=Math.sin(i*2.4)*.3;scene.add(l);}};
-  const chair=(x,z,rot=0)=>{const g=new THREE.Group();g.position.set(x,0,z);g.rotation.y=rot;scene.add(g);box(.62,.15,.62,black,0,.48,0,g);box(.62,.72,.13,black,0,.85,.25,g);cyl(.055,.42,gold,0,.2,0,g);for(let i=0;i<4;i++){const a=i*Math.PI/2;box(.06,.05,.38,black,Math.sin(a)*.16,.06,Math.cos(a)*.16,g);}};
-  const desk=(x,z,rot=0,withChair=true)=>{const g=new THREE.Group();g.position.set(x,0,z);g.rotation.y=rot;scene.add(g);box(1.85,.14,1.15,wood2,0,.96,0,g);for(const dx of [-.78,.78])for(const dz of [-.43,.43])box(.08,.9,.08,black,dx,.46,dz,g);box(.68,.48,.07,black,0,1.27,-.38,g);box(.6,.39,.025,screen,0,1.28,-.335,g);box(.48,.035,.22,cream,0,1.06,.22,g);if(withChair)chair(0,1.05,Math.PI);};
-  const person=(x,z,color)=>{const g=new THREE.Group();g.position.set(x,0,z);scene.add(g);cyl(.19,.3,black,0,.52,.3,g);box(.55,.14,.55,black,0,.52,.3,g);box(.55,.68,.12,black,0,.85,.54,g);const body=new THREE.Mesh(new THREE.CapsuleGeometry(.21,.36,4,8),M(color));body.position.set(0,1.1,-.06);g.add(body);sphere(.16,skin,0,1.52,-.12,g);sphere(.165,black,0,1.58,-.12,g);box(.11,.4,.11,M(color),-.22,1.14,-.27,g).rotation.x=-.65;box(.11,.4,.11,M(color),.22,1.14,-.27,g).rotation.x=-.65;box(.13,.46,.13,black,-.12,.25,.05,g).rotation.x=-.2;box(.13,.46,.13,black,.12,.25,.05,g).rotation.x=-.2;};
-  const sofa=(x,z,w=2.2,color=fabric)=>{box(w,.38,.78,color,x,.38,z);box(w,.72,.16,color,x,.72,z+.3);for(const dx of [-w/2+.12,w/2-.12])box(.16,.48,.82,color,x+dx,.52,z);};
-  const roundTable=(x,z,r=.55)=>{cyl(r,.12,wood2,x,.68,z);cyl(.07,.62,black,x,.31,z);};
-  const label=(txt,x,z)=>{const c=document.createElement('canvas');c.width=512;c.height=128;const ctx=c.getContext('2d');ctx.fillStyle='#f2dfc2';ctx.font='bold 48px Arial';ctx.textAlign='center';ctx.fillText(txt,256,78);const t=new THREE.CanvasTexture(c);t.colorSpace=THREE.SRGBColorSpace;const s=new THREE.Sprite(new THREE.SpriteMaterial({map:t,transparent:true}));s.position.set(x,2.8,z);s.scale.set(2.3,.58,1);scene.add(s);};
-  // One continuous tiled floor and a clean, rectangular building shell.
-  box(34,.38,22,floor,0,-.2,0);
-  for(let x=-16;x<17;x+=2)for(let z=-10;z<11;z+=2)box(1.96,.018,1.96,tile,x,-.005,z);
-  box(34,3,.35,wall,0,1.5,-11);box(34,3,.35,wall,0,1.5,11);box(.35,3,22,wall,-17,1.5,0);box(.35,3,22,wall,17,1.5,0);
-  // Room builder: solid back/side walls, front wall split around a real doorway.
-  const room=(x,z,w,d,name)=>{const h=2.65,door=1.25,front=z+d/2;box(w,h,.16,wall,x,h/2,z-d/2);box(.16,h,d,wall,x-w/2,h/2,z);box(.16,h,d,wall,x+w/2,h/2,z);box((w-door)/2,h,.16,wall,x-(w+door)/4,h/2,front);box((w-door)/2,h,.16,wall,x+(w+door)/4,h/2,front);box(door,.07,.16,gold,x,h,front);const dgrp=new THREE.Group();dgrp.position.set(x-door/2,.05,front);scene.add(dgrp);box(door-.08,2.35,.08,wood,(door-.08)/2,1.17,0,dgrp);box(.055,.07,.1,gold,door-.2,1.16,.05,dgrp);dgrp.rotation.y=-.48;label(name,x,z);};
-  // Back-left executive suite and quiet research office.
-  room(-12,-7,8,7,'EXECUTIVE');desk(-13,-7.2,.0);sofa(-14.2,-9,1.5);roundTable(-11.8,-9,.48);plant(-15.2,-9.5);box(1.5,1.7,.35,wood,-9.1,.85,-9.5);plant(-9.8,-5,.55);
-  room(-4.5,-7,5,7,'RESEARCH');desk(-4.5,-7.2);box(1.5,1.6,.32,wood,-5.9,.8,-9.5);for(let y=.35;y<1.5;y+=.35)box(1.35,.035,.28,gold,-5.9,y,-9.3);plant(-3.2,-9.3,.55);
-  // Two properly furnished meeting rooms along the back, furniture clear of doors.
-  room(3,-7,9,7,'BOARDROOM');box(5,.16,1.75,wood2,3,.94,-7.1);for(let x=.8;x<=5.2;x+=1.45){chair(x,-8.35,0);chair(x,-5.85,Math.PI);}box(3.4,1.65,.1,black,3,1.75,-10.25);box(3.1,1.35,.035,screen,3,1.78,-10.18);plant(6.7,-9.2,.55);
-  room(12,-7,8,7,'MEETING');box(4.4,.16,1.5,wood2,12,.94,-7.1);for(let x=10.3;x<=13.7;x+=1.65){chair(x,-8.25);chair(x,-5.95,Math.PI);}box(2.8,1.5,.1,black,12,1.65,-10.25);box(2.5,1.2,.035,screen,12,1.68,-10.18);
-  // Main open-plan work area: eight individual desks, generous aisles and no bench tables.
-  // Two clean rows of individual desks. All monitors face north (-Z); staff sit south of each desk.
-  // Stations are shifted between room entrances, leaving a clear approach corridor to every door.
-  const stations=[[-10,.1],[-3,.1],[4,.1],[10,.1],[-10,4.7],[-3,4.7],[4,4.7],[10,4.7]];
-  stations.forEach(([x,z],i)=>{desk(x,z,0,false);person(x,z+1.42,team[i][1]);});
-  // Reception and branded feature wall.
-  box(4.1,.18,1.05,black,-14,.95,2.5);box(5,.12,.22,wood,-14,1.45,-1.65);box(5,2.7,.18,wood,-14,1.55,-1.85);box(1.1,1.2,.06,red,-14,2.1,-1.73);
-  const cv=document.createElement('canvas');cv.width=1024;cv.height=256;const ctx=cv.getContext('2d');ctx.fillStyle='#f5e8d2';ctx.font='bold 112px Arial';ctx.textAlign='center';ctx.fillText('NEXLOVA',512,155);const tx=new THREE.CanvasTexture(cv);tx.colorSpace=THREE.SRGBColorSpace;const logo=new THREE.Sprite(new THREE.SpriteMaterial({map:tx,transparent:true}));logo.position.set(-14,1.25,-1.68);logo.scale.set(3.5,.85,1);scene.add(logo);
-  // Lounge at center-right: seating and coffee tables, no desks in circulation.
-  sofa(11,2.4,2.4);sofa(14,2.4,2.4,red);sofa(12.5,4.7,2.5);roundTable(12.5,3.55,.68);roundTable(9.7,4.2,.42);plant(15.7,5.4,.8);plant(9.4,1.2,.7);
-  // Coffee bar along the right perimeter with shelves and compact equipment.
-  box(4.7,.18,1,wood2,14,.92,-1.8);box(4.7,1.65,.14,black,14,1.75,-2.35);box(4.25,.9,.035,screen,14,1.82,-2.26);for(let y=2.45;y<=3.05;y+=.3)box(4.1,.045,.22,wood2,14,y,-2.55);for(let x=12.3;x<=15.7;x+=.85){box(.36,.48,.3,black,x,1.3,-1.8);cyl(.1,.06,gold,x,1.58,-1.8);}
-  // Removed the lower-left studio room and all of its contents; keep the floor open.
-  // Content studio in the lower-left corner (restored).
-  room(-13,8,7,5,'STUDIO');desk(-14,7.6);box(2.8,1.65,.12,black,-14,1.65,5.7);box(2.45,1.25,.03,screen,-14,1.68,5.62);for(let x=-15.2;x<=-12.8;x+=.6)box(.12,1.7,.12,black,x,1.2,9.8);plant(-10.5,9.5,.6);
-  // Two usable call rooms, each with one chair and a desk; not tiny chair-sized cubicles.
-  room(-5.5,8,5,5,'CALL ROOM');desk(-5.5,7.8);sofa(-4.5,9.4,1.1);
-  // Recreation nook with compact game table and soft seating.
-  box(5.2,.12,4.2,green,-.2,.04,8.1);box(1.8,.18,1.05,wood2,-.2,.58,8.1);chair(-1.5,8.1);chair(1.1,8.1);sphere(.42,red,-2.1,.5,9.3);roundTable(2.6,8.3,.48);plant(3.8,9.6,.6);
-  // Restrooms and utility room at lower-right; fixtures placed inside their footprint.
-  room(12.5,8,7,5,'SERVICES');for(const x of [10.8,13]){box(1.15,.08,.9,black,x,.75,7.4);cyl(.22,.38,cream,x,.55,8.4);}box(1.3,1.5,.3,wood,15.1,.75,9.3);for(let y=.3;y<1.4;y+=.35)box(1.15,.035,.25,gold,15.1,y,9.1);
-  // Indoor plants and warm indirect architectural lighting.
-  for(const [x,z] of [[-16,-10],[ -8,-3],[7,5],[16,6],[-9,10],[5,-10]])plant(x,z,.65);
-  for(const [x,z] of [[-14,2.5],[12,4],[14,-2]]){const l=new THREE.PointLight('#e8ad69',1.1,5);l.position.set(x,2,z);scene.add(l);}
-  const resize=()=>{const w=host.clientWidth||900,h=host.clientHeight||650;camera.aspect=w/h;camera.updateProjectionMatrix();renderer.setSize(w,h);};resize();const obs=new ResizeObserver(resize);obs.observe(host);let frame;const animate=()=>{frame=requestAnimationFrame(animate);controls.update();renderer.render(scene,camera);};animate();
-  return()=>{cancelAnimationFrame(frame);obs.disconnect();controls.dispose();renderer.dispose();if(renderer.domElement.parentNode===host)host.removeChild(renderer.domElement);scene.traverse(o=>{if(o.geometry)o.geometry.dispose();if(o.material){const ms=Array.isArray(o.material)?o.material:[o.material];ms.forEach(m=>{if(m.map)m.map.dispose();m.dispose();});}});};
+  const scene=new THREE.Scene();scene.background=new THREE.Color('#d8dfe5');
+  const camera=new THREE.PerspectiveCamera(42,1,.1,180);camera.position.set(0,34,.1);
+  const renderer=new THREE.WebGLRenderer({antialias:true,powerPreference:'high-performance'});renderer.setPixelRatio(Math.min(devicePixelRatio||1,1.6));renderer.shadowMap.enabled=true;renderer.shadowMap.type=THREE.PCFSoftShadowMap;renderer.outputColorSpace=THREE.SRGBColorSpace;renderer.toneMapping=THREE.ACESFilmicToneMapping;renderer.toneMappingExposure=1.15;host.appendChild(renderer.domElement);
+  const controls=new OrbitControls(camera,renderer.domElement);controls.target.set(0,0,0);controls.enableDamping=true;controls.dampingFactor=.07;controls.maxPolarAngle=Math.PI*.49;controls.minDistance=8;controls.maxDistance=55;
+  scene.add(new THREE.HemisphereLight('#ffffff','#8c8277',2.1));
+  const sun=new THREE.DirectionalLight('#fff0dc',2.8);sun.position.set(-12,25,14);sun.castShadow=true;sun.shadow.mapSize.set(2048,2048);sun.shadow.camera.left=-22;sun.shadow.camera.right=22;sun.shadow.camera.top=20;sun.shadow.camera.bottom=-20;scene.add(sun);
+  const fill=new THREE.DirectionalLight('#c4d8ff',.8);fill.position.set(16,12,-18);scene.add(fill);
+  const mat=(c,r=.72)=>new THREE.MeshStandardMaterial({color:c,roughness:r});
+  const mats={floor:mat('#c8c3b9'),tile:mat('#d8d3ca'),wall:mat('#454c52'),wood:mat('#9a6945'),oak:mat('#c18d5b'),metal:mat('#333b43'),black:mat('#20262d'),screen:mat('#172c3d',.2),cream:mat('#e8dfd0'),fabric:mat('#66737c'),red:mat('#8d3435'),green:mat('#557a60'),skin:mat('#bd8d70'),gold:mat('#c6a16c',.35)};
+  const box=(w,h,d,m,x,y,z,parent=scene)=>{const o=new THREE.Mesh(new THREE.BoxGeometry(w,h,d),m);o.position.set(x,y,z);o.castShadow=true;o.receiveShadow=true;parent.add(o);return o;};
+  const cyl=(r,h,m,x,y,z,parent=scene)=>{const o=new THREE.Mesh(new THREE.CylinderGeometry(r,r,h,18),m);o.position.set(x,y,z);o.castShadow=true;parent.add(o);return o;};
+  const sphere=(r,m,x,y,z,parent=scene)=>{const o=new THREE.Mesh(new THREE.SphereGeometry(r,16,12),m);o.position.set(x,y,z);o.castShadow=true;parent.add(o);return o;};
+  const label=(txt,x,z)=>{const c=document.createElement('canvas');c.width=512;c.height=128;const ctx=c.getContext('2d');ctx.fillStyle='#f5eee4';ctx.font='bold 46px Arial';ctx.textAlign='center';ctx.fillText(txt,256,78);const t=new THREE.CanvasTexture(c);t.colorSpace=THREE.SRGBColorSpace;const s=new THREE.Sprite(new THREE.SpriteMaterial({map:t,transparent:true}));s.position.set(x,2.9,z);s.scale.set(2.7,.68,1);scene.add(s);};
+  const plant=(x,z,s=1)=>{cyl(.28*s,.38*s,mats.wood,x,.19*s,z);for(let i=0;i<6;i++){const l=new THREE.Mesh(new THREE.ConeGeometry(.14*s,.85*s,8),mat('#4e805a'));l.position.set(x+Math.sin(i*2.4)*.18*s,.72*s,z+Math.cos(i*2.4)*.18*s);l.rotation.z=Math.sin(i*2.4)*.3;scene.add(l);}};
+  const chair=(x,z,rot=0)=>{const g=new THREE.Group();g.position.set(x,0,z);g.rotation.y=rot;scene.add(g);box(.62,.14,.62,mats.metal,0,.47,0,g);box(.62,.68,.13,mats.metal,0,.82,.25,g);cyl(.055,.42,mats.metal,0,.2,0,g);for(let i=0;i<4;i++){const a=i*Math.PI/2;box(.055,.045,.36,mats.metal,Math.sin(a)*.16,.05,Math.cos(a)*.16,g);}return g;};
+  const desk=(x,z,rot=0)=>{const g=new THREE.Group();g.position.set(x,0,z);g.rotation.y=rot;scene.add(g);box(1.55,.13,.92,mats.oak,0,.91,0,g);for(const dx of [-.64,.64])for(const dz of [-.35,.35])box(.07,.84,.07,mats.metal,dx,.42,dz,g);box(.58,.43,.06,mats.black,0,1.19,-.29,g);box(.52,.34,.02,mats.screen,0,1.2,-.255,g);box(.44,.025,.18,mats.cream,0,1.02,.2,g);chair(x,z+1.03,Math.PI);};
+  // Building shell and light oak floor.
+  box(32,.35,22,mats.floor,0,-.19,0);
+  for(let x=-15;x<16;x+=2)for(let z=-10;z<11;z+=2)box(1.96,.016,1.96,mats.tile,x,-.005,z);
+  // Glazed perimeter walls keep the floor plan readable from above.
+  box(32,2.9,.18,mats.wall,0,1.45,-11);box(32,2.9,.18,mats.wall,0,1.45,11);box(.18,2.9,22,mats.wall,-16,1.45,0);box(.18,2.9,22,mats.wall,16,1.45,0);
+  const partition=(x,z,w,d,doorSide='south')=>{const h=2.55,t=.13;box(w,h,t,mats.wall,x,h/2,z-d/2);box(t,h,d,mats.wall,x-w/2,h/2,z);box(t,h,d,mats.wall,x+w/2,h/2,z);if(doorSide==='south'){box((w-1.15)/2,h,t,mats.wall,x-(w+1.15)/4,h/2,z+d/2);box((w-1.15)/2,h,t,mats.wall,x+(w+1.15)/4,h/2,z+d/2);}else box(w,h,t,mats.wall,x,h/2,z+d/2);};
+  // Manager office: enclosed glass-front room, compact executive desk and visitor seating.
+  partition(-11,-7,9,7);box(8.7,2.35,.045,mat('#a8c2cc',.22),-11,1.25,-3.47);label('MANAGER OFFICE',-11,-7);
+  desk(-11,-7.2,0);box(1.8,.34,.72,mats.fabric,-13.3,.36,-8.8);box(1.8,.55,.14,mats.fabric,-13.3,.68,-8.5);cyl(.42,.1,mats.oak,-11.1,.63,-9.2);cyl(.06,.55,mats.metal,-11.1,.31,-9.2);plant(-14.7,-9.4,.7);
+  // Conference room: a real meeting table and six individual chairs.
+  partition(8,-7,13,7);box(12.7,2.35,.045,mat('#a8c2cc',.22),8,1.25,-3.47);label('MEETING ROOM',8,-7);
+  box(5.2,.14,1.65,mats.oak,8,.88,-7.1);for(let x=6;x<=10;x+=1.35){chair(x,-8.35,0);chair(x,-5.85,Math.PI);}box(3.2,1.45,.08,mats.black,8,1.55,-10.15);box(2.9,1.15,.025,mats.screen,8,1.58,-10.1);
+  // Six separate compact employee desks; each desk has its own chair and monitor.
+  const stations=[[-9,.4],[-3,.4],[3,.4],[9,.4],[-6,5],[6,5]];
+  stations.forEach(([x,z])=>desk(x,z,0));
+  // Employee characters with articulated limbs and simple autonomous routes.
+  const people=team.map((person,i)=>{
+   const g=new THREE.Group();scene.add(g);const body= new THREE.Group();g.add(body);
+   const shirt=mat(person.color),dark=mats.metal;
+   cyl(.18,.22,dark,0,.16,0,body);
+   const torso=new THREE.Mesh(new THREE.CapsuleGeometry(.22,.42,4,8),shirt);torso.position.y=.82;body.add(torso);
+   sphere(.16,mats.skin,0,1.28,0,body);sphere(.17,mat('#332b29'),0,1.35,-.025,body);
+   const armL=new THREE.Group(),armR=new THREE.Group();armL.position.set(-.24,1.02,0);armR.position.set(.24,1.02,0);body.add(armL,armR);
+   box(.11,.42,.11,shirt,0,-.19,0,armL);box(.11,.42,.11,shirt,0,-.19,0,armR);
+   const legL=new THREE.Group(),legR=new THREE.Group();legL.position.set(-.12,.43,0);legR.position.set(.12,.43,0);body.add(legL,legR);
+   box(.13,.43,.14,dark,0,-.2,0,legL);box(.13,.43,.14,dark,0,-.2,0,legR);
+   const home=new THREE.Vector3(stations[i][0],0,stations[i][1]+1.05);
+   const destinations=[home,new THREE.Vector3(13,0,-1),new THREE.Vector3(12,0,5),new THREE.Vector3(8,0,-7.4)];
+   const targetIndex=[0,0,1,0,3,0][i];
+   g.position.copy(home);g.userData={home,destinations,target:destinations[targetIndex].clone(),phase:Math.random()*6.28,walking:false,armL,armR,legL,legR,body,person,index:i};
+   return g;
+  });
+  // Coffee corner with an actual counter, espresso machine, mugs and shelves.
+  box(4.8,.16,.85,mats.oak,13,.88,-1.7);box(4.8,1.45,.12,mats.black,13,1.65,-2.2);box(4.3,.8,.04,mats.screen,13,1.7,-2.12);
+  box(1.05,.85,.72,mats.metal,11.6,1.38,-1.65);box(.65,.3,.48,mats.black,11.6,1.95,-1.65);for(let x=12.5;x<=14.8;x+=.65){cyl(.12,.07,mats.cream,x,1.05,-1.55);cyl(.065,.07,mats.gold,x,1.13,-1.55);}
+  for(let y=2.35;y<=2.95;y+=.3)box(4.1,.05,.2,mats.oak,13,y,-2.35);label('COFFEE BAR',13,-1.3);
+  // Lounge: soft sofas, low coffee table, rug and greenery.
+  box(7,.04,4.2,mat('#a7a29a'),10,.03,5.8);box(2.5,.38,.82,mats.fabric,8.7,.38,5.4);box(2.5,.72,.16,mats.fabric,8.7,.75,5.72);box(.16,.5,.84,mats.fabric,7.55,.52,5.4);box(.16,.5,.84,mats.fabric,9.85,.52,5.4);
+  box(2.5,.38,.82,mats.red,12,.38,5.4);box(2.5,.72,.16,mats.red,12,.75,5.72);box(.16,.5,.84,mats.red,10.85,.52,5.4);box(.16,.5,.84,mats.red,13.15,.52,5.4);
+  cyl(.65,.12,mats.oak,10.3,.48,7);cyl(.07,.42,mats.metal,10.3,.23,7);plant(14.7,7,.85);plant(7,7,.8);label('LOUNGE',10.5,4.2);
+  // Reception branding and plants.
+  box(3.8,.18,.9,mats.black,-13,.88,1.9);box(3.4,1.5,.06,mats.wood,-13,1.75,-1.1);
+  const c=document.createElement('canvas');c.width=1024;c.height=256;const ctx=c.getContext('2d');ctx.fillStyle='#f6eee2';ctx.font='bold 112px Arial';ctx.textAlign='center';ctx.fillText('NEXLOVA',512,155);const tex=new THREE.CanvasTexture(c);tex.colorSpace=THREE.SRGBColorSpace;const logo=new THREE.Sprite(new THREE.SpriteMaterial({map:tex,transparent:true}));logo.position.set(-13,1.9,-1.02);logo.scale.set(3.4,.85,1);scene.add(logo);
+  plant(-15,8,.75);plant(-1,8,.7);plant(15,-9,.75);plant(4,-9,.65);plant(-15,-9,.7);
+  // Pick a staff member by clicking their 3D character.
+  const raycaster=new THREE.Raycaster(),pointer=new THREE.Vector2();
+  const onPointer=e=>{const r=renderer.domElement.getBoundingClientRect();pointer.x=((e.clientX-r.left)/r.width)*2-1;pointer.y=-((e.clientY-r.top)/r.height)*2+1;raycaster.setFromCamera(pointer,camera);const hits=raycaster.intersectObjects(people,true);if(hits.length){let o=hits[0].object;while(o.parent&&!people.includes(o))o=o.parent;const idx=people.indexOf(o);if(idx>=0)setSelected(idx);}};
+  renderer.domElement.addEventListener('pointerdown',onPointer);
+  const resize=()=>{const w=host.clientWidth||900,h=host.clientHeight||650;camera.aspect=w/h;camera.updateProjectionMatrix();renderer.setSize(w,h);};resize();const obs=new ResizeObserver(resize);obs.observe(host);
+  let frame=0,raf;const animate=()=>{raf=requestAnimationFrame(animate);const t=frame++/60;
+   people.forEach((g,i)=>{const u=g.userData;const moving=i===2||i===4;let dest=u.target;
+    if(moving){const phase=(t/13+i*.21)%1;const route=u.destinations;const seg=Math.floor(phase*route.length),a=route[seg],b=route[(seg+1)%route.length],f=(phase*route.length)%1;dest=a.clone().lerp(b,f);g.position.lerp(dest,.035);g.rotation.y=Math.atan2(b.x-a.x,b.z-a.z);u.walking=true;}
+    else{g.position.x=u.home.x+Math.sin(t*.55+i)*.025;g.position.z=u.home.z+Math.cos(t*.48+i)*.025;g.rotation.y=Math.sin(t*.3+i)*.08;}
+    const swing=moving?Math.sin(t*5+i)*.5:Math.sin(t*2+i)*.045;u.legL.rotation.x=swing;u.legR.rotation.x=-swing;u.armL.rotation.x=-swing*.7;u.armR.rotation.x=swing*.7;u.body.rotation.z=Math.sin(t*1.4+i)*.018;
+   });
+   controls.update();renderer.render(scene,camera);
+  };animate();
+  host.__officeCamera={set:(mode)=>{if(mode==='top'){camera.position.set(0,34,.1);controls.target.set(0,0,0);controls.minDistance=8;controls.maxDistance=55;controls.maxPolarAngle=Math.PI*.49;}else{camera.position.set(-2,2.4,8);controls.target.set(-2,1.7,0);controls.minDistance=.1;controls.maxDistance=12;controls.maxPolarAngle=Math.PI*.92;}controls.update();}};
+  return()=>{cancelAnimationFrame(raf);obs.disconnect();renderer.domElement.removeEventListener('pointerdown',onPointer);controls.dispose();renderer.dispose();if(renderer.domElement.parentNode===host)host.removeChild(renderer.domElement);scene.traverse(o=>{if(o.geometry)o.geometry.dispose();if(o.material){const ms=Array.isArray(o.material)?o.material:[o.material];ms.forEach(m=>{if(m.map)m.map.dispose();m.dispose();});}});delete host.__officeCamera;};
  },[]);
- return <div className="office-scene office-three" ref={mount} aria-label="Reorganized interactive 3D Nexlova office"><div className="scene-hint">DRAG TO ROTATE · SCROLL TO ZOOM</div></div>;
+ const changeMode=mode=>{setCameraMode(mode);mount.current?.__officeCamera?.set(mode);};
+ const chosen=selected===null?null:team[selected];
+ return <div className="office-scene office-three" ref={mount} aria-label="Interactive realistic 3D NEXLOVA office">
+  <div className="office-scene-toolbar"><div className="office-view-switch"><button className={cameraMode==='top'?'chosen':''} onClick={()=>changeMode('top')}>Top View</button><button className={cameraMode==='inside'?'chosen':''} onClick={()=>changeMode('inside')}>First Person</button></div><span className="office-staff-count">6 TEAM MEMBERS</span></div>
+  {chosen&&<div className="office-agent-card"><button onClick={()=>setSelected(null)} aria-label="Close">×</button><b>{chosen.name}</b><span>{chosen.role}</span><small>{chosen.status}</small></div>}
+  <div className="scene-hint">DRAG TO ROTATE · SCROLL TO ZOOM · CLICK A TEAM MEMBER</div>
+ </div>;
 }
