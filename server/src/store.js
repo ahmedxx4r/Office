@@ -41,6 +41,18 @@ export async function initStore() {
       loadJson();
     }
   } else loadJson();
+  // Migrate the previous demo roster to the current six-person NEXLOVA team.
+  const legacyIds = new Set(['gm','hr','trainer','research','media','funnel','builder','copy','accountant','assistant']);
+  if ((state.agents || []).some(agent => legacyIds.has(agent.id))) {
+    const legacyMap = { gm:'operations', hr:'operations', trainer:'operations', research:'data', media:'marketing', funnel:'marketing', builder:'developer', copy:'content', accountant:'finance', assistant:'operations' };
+    const currentIds = new Set(seedAgents.map(agent => agent.id));
+    const customAgents = (state.agents || []).filter(agent => !legacyIds.has(agent.id) && !currentIds.has(agent.id));
+    state.tasks = (state.tasks || []).map(task => ({ ...task, agentId: legacyMap[task.agentId] || task.agentId }));
+    state.messages = (state.messages || []).map(message => ({ ...message, agentId: legacyMap[message.agentId] || message.agentId }));
+    const previous = new Map((state.agents || []).map(agent => [agent.id, agent]));
+    state.agents = [...seedAgents.map(seed => ({ ...seed, status: previous.get(seed.id)?.status || 'idle' })), ...customAgents];
+    persist();
+  }
   return state;
 }
 function loadJson() {
