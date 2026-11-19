@@ -2,16 +2,16 @@ import React, { useState } from 'react';
 import OfficeScene from './components/OfficeScene.jsx';
 
 const initialAgents = [
-  {id:'gm',name:'Nour',role:'General Manager',avatar:'✦',status:'idle',skills:['Planning','Leadership','Operations']},
-  {id:'research',name:'Atlas',role:'Researcher',avatar:'⌕',status:'idle',skills:['Research','Analysis','Reports']},
-  {id:'builder',name:'Nova',role:'Developer',avatar:'⌘',status:'idle',skills:['Development','Automation','Testing']},
-  {id:'copy',name:'Echo',role:'Content Specialist',avatar:'✎',status:'idle',skills:['Writing','Content','Brand voice']},
-  {id:'media',name:'Pixel',role:'Marketing Specialist',avatar:'◈',status:'idle',skills:['Ads','Campaigns','Analytics']},
-  {id:'hr',name:'Mira',role:'People Operations',avatar:'◎',status:'idle',skills:['Hiring','People','Training']}
+  {id:'marketing',name:'عمر',role:'Marketing Specialist',avatar:'ع',status:'idle',skills:['Campaigns','Social Media','Ads']},
+  {id:'data',name:'مريم',role:'Data Analyst',avatar:'م',status:'idle',skills:['Analytics','Dashboards','Research']},
+  {id:'finance',name:'يوسف',role:'Finance Specialist',avatar:'ي',status:'idle',skills:['Budgeting','Accounting','Forecasting']},
+  {id:'content',name:'سلمى',role:'Content Creator',avatar:'س',status:'idle',skills:['Writing','Content','Brand Voice']},
+  {id:'developer',name:'زياد',role:'Software Developer',avatar:'ز',status:'idle',skills:['Development','Automation','Testing']},
+  {id:'operations',name:'نور',role:'HR & Operations',avatar:'ن',status:'idle',skills:['Hiring','People','Operations']}
 ];
 export default function App(){
  const [data,setData]=useState({agents:initialAgents,tasks:[],messages:[],meetings:[]});
- const [tab,setTab]=useState('Overview'),[agent,setAgent]=useState('gm'),[title,setTitle]=useState(''),[brief,setBrief]=useState(''),[chat,setChat]=useState(''),[toast,setToast]=useState(''),[quickTask,setQuickTask]=useState(false),[officeFullscreen,setOfficeFullscreen]=useState(false);
+ const [tab,setTab]=useState('Overview'),[agent,setAgent]=useState('marketing'),[title,setTitle]=useState(''),[brief,setBrief]=useState(''),[chat,setChat]=useState(''),[toast,setToast]=useState(''),[quickTask,setQuickTask]=useState(false),[officeFullscreen,setOfficeFullscreen]=useState(false);
  const chosen=data.agents.find(a=>a.id===agent)||data.agents[0];
  const toggleOfficeFullscreen=async()=>{const el=document.getElementById('office-workspace');if(!el)return;try{if(!document.fullscreenElement){await el.requestFullscreen();setOfficeFullscreen(true);}else{await document.exitFullscreen();setOfficeFullscreen(false);}}catch{setOfficeFullscreen(v=>!v);}};
  React.useEffect(()=>{const sync=()=>setOfficeFullscreen(!!document.fullscreenElement);document.addEventListener('fullscreenchange',sync);return()=>document.removeEventListener('fullscreenchange',sync);},[]);
