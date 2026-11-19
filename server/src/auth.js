@@ -1,7 +1,7 @@
 import crypto from 'node:crypto';
-const secret = () => process.env.AUTH_SECRET || process.env.OWNER_PASSWORD || 'local-development-only-change-me';
+const secret = () => process.env.AUTH_SECRET || process.env.OFFICE_GATE_SECRET || process.env.OWNER_PASSWORD || 'local-development-only-change-me';
 const b64 = value => Buffer.from(value).toString('base64url');
-export function authRequired() { return Boolean(process.env.OWNER_PASSWORD); }
+export function authRequired() { return Boolean(process.env.OWNER_PASSWORD || process.env.OFFICE_ACCESS_PASSWORD); }
 export function issueToken() {
   const payload = b64(JSON.stringify({ sub: 'owner', exp: Math.floor(Date.now()/1000) + 12*60*60 }));
   const signature = crypto.createHmac('sha256', secret()).update(payload).digest('base64url');
@@ -23,7 +23,7 @@ export function requireOwner(req, res, next) {
   next();
 }
 export function passwordMatches(candidate='') {
-  const expected = Buffer.from(process.env.OWNER_PASSWORD || '');
+  const expected = Buffer.from(process.env.OWNER_PASSWORD || process.env.OFFICE_ACCESS_PASSWORD || '');
   const supplied = Buffer.from(String(candidate));
   return expected.length > 0 && expected.length === supplied.length && crypto.timingSafeEqual(expected, supplied);
 }
