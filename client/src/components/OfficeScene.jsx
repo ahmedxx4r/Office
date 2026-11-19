@@ -13,13 +13,13 @@ const box=(w,h,d,ma,x,y,z,p=scene)=>{const o=new THREE.Mesh(new THREE.BoxGeometr
 const cyl=(r,h,ma,x,y,z,p=scene)=>{const o=new THREE.Mesh(new THREE.CylinderGeometry(r,r,h,16),ma);o.position.set(x,y,z);o.castShadow=true;o.receiveShadow=true;p.add(o);return o;};
 const sphere=(r,ma,x,y,z,p=scene)=>{const o=new THREE.Mesh(new THREE.SphereGeometry(r,14,10),ma);o.position.set(x,y,z);o.castShadow=true;p.add(o);return o;};
 const room=(x,z,w,d)=>{box(w,.38,d,floor,x,-.22,z);for(let i=0;i<Math.floor(w/2);i++)for(let j=0;j<Math.floor(d/2);j++)box(1.96,.025,1.96,tile,x-w/2+1+i*2,-.015,z-d/2+1+j*2);};
-const partition=(x,z,w,d,h=2.7)=>{box(w,h,.13,wall,x,h/2,z-d/2);box(w,h,.13,wall,x,h/2,z+d/2);box(.13,h,d,wall,x-w/2,h/2,z);box(.13,h,d,wall,x+w/2,h/2,z);};
+const partition=(x,z,w,d,h=2.7)=>{const gap=1.35;box(w,h,.13,wall,x,h/2,z-d/2);box((w-gap)/2,h,.13,wall,x-(w+gap)/4,h/2,z+d/2);box((w-gap)/2,h,.13,wall,x+(w+gap)/4,h/2,z+d/2);box(.13,h,d,wall,x-w/2,h/2,z);box(.13,h,d,wall,x+w/2,h/2,z);box(gap+.12,.12,.18,gold,x,h,z+d/2);const door=new THREE.Group();door.position.set(x-gap/2,.05,z+d/2);scene.add(door);box(gap-.08,2.45,.09,wood, (gap-.08)/2,1.22,0,door);box(.07,.08,.12,gold,gap-.22,1.2,.08,door);door.rotation.y=-.72;};
 const chair=(x,z,ma=black)=>{box(.62,.16,.62,ma,x,.5,z);box(.62,.72,.13,ma,x,.88,z+.25);cyl(.06,.5,gold,x,.22,z);};
 const desk=(x,z,w=2.1,d=1.1)=>{box(w,.13,d,wood2,x,.92,z);for(const dx of [-w*.42,w*.42])for(const dz of [-d*.38,d*.38])box(.09,.88,.09,black,x+dx,.45,z+dz);box(.55,.06,.28,screen,x,.99,z-.22);box(.48,.025,.18,cream,x,.99,z+.18);chair(x,z+d*.75);};
 const plant=(x,z,k=1)=>{cyl(.32*k,.5*k,wood,x,.25*k,z);for(let i=0;i<7;i++){const leaf=new THREE.Mesh(new THREE.ConeGeometry(.13*k,.9*k,7),M('#47734c'));leaf.position.set(x+Math.sin(i*2.4)*.23*k,.85*k,z+Math.cos(i*2.4)*.23*k);leaf.rotation.z=Math.sin(i*2.4)*.35;scene.add(leaf);}};
 const sofa=(x,z,w=2.4,ma=fabric)=>{box(w,.42,.82,ma,x,.42,z);box(w,.82,.2,ma,x,.78,z+.34);for(const dx of [-w*.34,w*.34])box(.16,.5,.86,ma,x+dx,.55,z);};
 const table=(x,z,r=.65)=>{cyl(r,.12,wood2,x,.72,z);cyl(.09,.68,black,x,.34,z);};
-const person=(x,z,color)=>{const g=new THREE.Group();g.position.set(x,0,z);scene.add(g);cyl(.22,.38,black,0,.55,.08,g);const torso=new THREE.Mesh(new THREE.CapsuleGeometry(.22,.42,4,8),M(color));torso.position.set(0,1.05,0);g.add(torso);sphere(.17,skin,0,1.47,-.02,g);sphere(.175,black,0,1.54,-.02,g);box(.13,.48,.13,M(color),-.24,1.05,-.05,g).rotation.z=-.55;box(.13,.48,.13,M(color),.24,1.05,-.05,g).rotation.z=.55;box(.14,.58,.14,black,-.12,.24,.22,g).rotation.x=-.35;box(.14,.58,.14,black,.12,.24,.22,g).rotation.x=-.35;};
+const person=(x,z,color)=>{const g=new THREE.Group();g.position.set(x,0,z);scene.add(g);cyl(.2,.34,black,0,.55,.34,g);box(.58,.16,.58,black,0,.55,.34,g);box(.58,.72,.12,black,0,.91,.59,g);const torso=new THREE.Mesh(new THREE.CapsuleGeometry(.22,.38,4,8),M(color));torso.position.set(0,1.12,-.03);g.add(torso);sphere(.17,skin,0,1.55,-.12,g);sphere(.175,black,0,1.62,-.12,g);box(.12,.43,.12,M(color),-.23,1.18,-.25,g).rotation.x=-.7;box(.12,.43,.12,M(color),.23,1.18,-.25,g).rotation.x=-.7;box(.13,.48,.13,black,-.13,.27,.02,g).rotation.x=-.25;box(.13,.48,.13,black,.13,.27,.02,g).rotation.x=-.25;};
 room(0,0,34,22);box(34,.65,.5,black,0,.1,-11);box(34,.65,.5,black,0,.1,11);box(.5,.65,22,black,-17,.1,0);box(.5,.65,22,black,17,.1,0);
 // Enclosed offices and meeting rooms along the rear wall
 partition(-12,-7,9,7);partition(-4.7,-7,4.8,7);partition(2,-7,8.2,7);partition(11,-7,8,7);
@@ -30,9 +30,10 @@ desk(-5,-7,2,1.2);desk(-5,-5,1.8,1);plant(-3.2,-9,.6);
 box(4.8,.18,1.8,wood2,2,.95,.95);for(let x=-.3;x<=4.3;x+=1.15){chair(x,-.3);chair(x,-2.3);}box(3,.95,.08,screen,2,2.7,-10.22);box(2.6,.035,.03,red,2,2.7,-10.15);
 // Conference room
 box(4.3,.18,1.8,wood2,11,.95,.9);for(let x=8.8;x<=13.2;x+=1.1){chair(x,-.3);chair(x,-2.3);}plant(15,-9,.8);
-// Central collaboration desks
-for(const x of [-8,0,8]){box(2.5,.16,7.2,wood2,x,.92,0);for(let z=-2.8;z<=2.8;z+=1.85){box(.09,.85,.09,black,x-1.05,.45,z);box(.09,.85,.09,black,x+1.05,.45,z);box(.48,.055,.26,screen,x,.99,z-.35);box(.42,.025,.16,cream,x,.99,z+.08);chair(x-1.75,z+.25);chair(x+1.75,z+.25);}}
-team.forEach((p,i)=>person([-8,0,8][i%3]+(i%2?-.25:.25),[-2.5,-.4,2.1][Math.floor(i/3)]||2.2,p[1]));
+// Eight individual executive-style workstations — no shared bench tables
+const workstations=[[-11,-2.1],[-4,-2.1],[3,-2.1],[10,-2.1],[-11,4.1],[-4,4.1],[3,4.1],[10,4.1]];
+workstations.forEach(([x,z],i)=>{const w=2.35,d=1.35;box(w,.16,d,wood2,x,.98,z);for(const dx of [-1,1])for(const dz of [-.52,.52])box(.09,.92,.09,black,x+dx,.48,z+dz);box(.78,.62,.09,black,x,1.38,z-.48);box(.68,.48,.025,screen,x,1.39,z-.425);box(.58,.04,.28,cream,x,1.09,z+.22);box(.26,.025,.2,black,x-.56,1.09,z+.22);box(.18,.04,.18,gold,x+.55,1.1,z+.22);person(x,z+1.42,team[i][1]);plant(x+1.35,z-.35,.48);});
+
 // Reception + Nexlova feature wall
 box(4.5,.18,1.15,black,-14,.95,3.9);box(5,.1,.35,wood,-14,.2,-1.5);box(5,3,.22,wood,-14,1.55,-1.8);box(1.1,1.3,.08,red,-14,2.15,-1.65);
 const cv=document.createElement('canvas');cv.width=1024;cv.height=256;const ctx=cv.getContext('2d');ctx.fillStyle='#f5e8d2';ctx.font='bold 110px Arial';ctx.textAlign='center';ctx.fillText('NEXLOVA',512,155);const tex=new THREE.CanvasTexture(cv);tex.colorSpace=THREE.SRGBColorSpace;const logo=new THREE.Sprite(new THREE.SpriteMaterial({map:tex,transparent:true}));logo.position.set(-14,1.25,-1.62);logo.scale.set(3.5,.85,1);scene.add(logo);
@@ -45,6 +46,29 @@ for(let x=-10;x<=-7;x+=1.6){partition(x,7.7,1.35,2.2,2.2);sofa(x,7.6,.9,red);}
 box(5,.12,4,green,-4.5,.05,8.4);box(2.3,.22,1.1,wood2,-4.5,.55,8.4);chair(-6.5,8.4,red);chair(-2.5,8.4,red);sphere(.48,red,-6.2,.55,9.5);
 box(5,.2,.95,wood2,2,.85,9);for(let x=0;x<=4;x+=1)chair(x,10.1);table(7,8.2,.75);chair(6.2,8.2);chair(7.8,8.2);plant(4.7,9.7,.75);
 partition(12,8.1,5.2,5.2,2.5);box(1.5,.08,1.1,black,10.4,.8,6.8);box(1.5,.08,1.1,black,12.4,.8,6.8);cyl(.28,.4,cream,10.4,.6,8);cyl(.28,.4,cream,12.4,.6,8);box(1.3,1.5,.08,wood,14.2,1,9.5);plant(15.8,9.7,.7);
+
+// Fill the previously empty rooms with functional furniture and visible room identities
+// Research / quiet office
+box(1.4,1.25,.55,wood,-5.8, .65,-9.4);box(1.2,.08,.42,black,-5.8,1.32,-9.4);for(let z=-9.8;z<=-8.8;z+=.45)box(.9,.035,.04,cream,-5.8,1.55,z);
+desk(-3.8,-7.8,1.65,1.05);plant(-3.1,-9.7,.65);
+// Boardroom storage, screen and individual conference chairs
+box(2.2,1.5,.3,wood,4.8, .8,-9.6);for(let y=.35;y<1.5;y+=.35)box(2.05,.035,.28,gold,4.8,y,-9.4);box(3.2,1.75,.12,black,2,1.75,-10.25);box(2.8,1.35,.04,screen,2,1.78,-10.16);
+for(let x=-.2;x<=4.2;x+=1.1){chair(x,-4.8);chair(x,-9.2);}
+// Meeting room storage and display
+box(2.6,1.35,.35,wood,14.1,.68,-9.5);for(let y=.35;y<1.25;y+=.3)box(2.4,.035,.32,gold,14.1,y,-9.3);box(2.8,1.6,.12,black,11,1.65,-10.25);box(2.5,1.25,.04,screen,11,1.68,-10.16);
+// Reception waiting chairs and filing shelves
+sofa(-15.1,1.2,1.7);table(-12.8,1.4,.55);plant(-16,2.6,.8);box(1.2,2,.4,wood,-9.5,1,-1.2);for(let y=.35;y<1.8;y+=.4)box(1.12,.035,.38,gold,-9.5,y,-.98);
+// Studio gets recording desk, monitor wall and acoustic panels
+box(2.8,.16,1.05,wood2,-14.7,.95,8.6);for(let x=-16;x<=-13;x+=.5)box(.08,1.8,.12,black,x,1.35,10.1);box(2.5,1.3,.1,screen,-15,1.8,6.8);desk(-14.7,6.4,1.7,1);
+// Call booths with doors and seating
+for(let x=-10;x<=-7;x+=1.6){box(.08,2.2,.08,gold,x-.62,1.1,6.6);box(.08,2.2,.08,gold,x+.62,1.1,6.6);box(1.18,.08,.08,gold,x,2.18,6.6);sofa(x,7.7,.85,red);box(.65,1.65,.06,wood,x,1,8.55);}
+// Lounge receives low tables, sideboard, cushions and greenery
+table(10.4,4.2,.55);table(14.8,3.4,.48);box(2.2,.8,.35,wood,15.5, .4,5.7);for(let y=.25;y<.9;y+=.28)box(2,.035,.3,gold,15.5,y,5.52);plant(9.3,5.2,.9);plant(16,1.2,.9);
+// Coffee corner shelves, espresso machines and menu display
+for(let y=2.4;y<=3.1;y+=.35)box(4.2,.045,.25,wood2,14,y,-3.25);for(let x=12.4;x<=15.6;x+=1.05){box(.38,.58,.32,black,x,1.45,-1.9);cyl(.11,.08,gold,x,1.77,-1.9);}
+// Utility room shelves and cleaning storage
+box(1.4,1.8,.4,wood,15.2,.9,9.4);for(let y=.35;y<1.9;y+=.38)box(1.25,.035,.35,gold,15.2,y,9.2);
+
 // Warm accent lighting around the perimeter and lounge zones
 for(const [x,z,w,d] of [[-14,3.9,4.6,1.3],[12.5,8.4,5.4,.12],[-4.5,8.4,5,.1],[2,9,5,.1]]){const l=new THREE.PointLight('#e7a65c',1.3,5);l.position.set(x,1.7,z);scene.add(l);box(w,.035,d,gold,x,.05,z);}
 for(let x=-15;x<=15;x+=3){box(.07,1.2,.07,gold,x,.65,-10.7);box(.07,1.2,.07,gold,x,.65,10.7);}
