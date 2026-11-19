@@ -37,7 +37,8 @@ export async function initStore() {
       console.log('[store] PostgreSQL persistence enabled');
     } catch (err) {
       pool = null;
-      console.error('[store] PostgreSQL unavailable; falling back to local JSON:', err.message);
+      console.error('[store] PostgreSQL unavailable:', err.message);
+      if (process.env.VERCEL === '1') throw new Error('ISystem requires its Supabase PostgreSQL connection in production: ' + err.message);
       loadJson();
     }
   } else loadJson();
