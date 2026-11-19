@@ -37,9 +37,25 @@ export default function OfficeScene(){
   // Glazed perimeter walls keep the floor plan readable from above.
   box(32,2.9,.18,mats.wall,0,1.45,-11);box(32,2.9,.18,mats.wall,0,1.45,11);box(.18,2.9,22,mats.wall,-16,1.45,0);box(.18,2.9,22,mats.wall,16,1.45,0);
   const partition=(x,z,w,d,doorSide='south')=>{const h=2.55,t=.13;box(w,h,t,mats.wall,x,h/2,z-d/2);box(t,h,d,mats.wall,x-w/2,h/2,z);box(t,h,d,mats.wall,x+w/2,h/2,z);if(doorSide==='south'){box((w-1.15)/2,h,t,mats.wall,x-(w+1.15)/4,h/2,z+d/2);box((w-1.15)/2,h,t,mats.wall,x+(w+1.15)/4,h/2,z+d/2);}else box(w,h,t,mats.wall,x,h/2,z+d/2);};
-  // Manager office: enclosed glass-front room, compact executive desk and visitor seating.
+  // Manager office: premium executive suite. Desk faces entrance; manager faces the door.
   partition(-11,-7,9,7);box(8.7,2.35,.045,mat('#a8c2cc',.22),-11,1.25,-3.47);label('MANAGER OFFICE',-11,-7);
-  desk(-11,-7.2,0);box(1.8,.34,.72,mats.fabric,-13.3,.36,-8.8);box(1.8,.55,.14,mats.fabric,-13.3,.68,-8.5);cyl(.42,.1,mats.oak,-11.1,.63,-9.2);cyl(.06,.55,mats.metal,-11.1,.31,-9.2);plant(-14.7,-9.4,.7);
+  // Oversized walnut executive desk with dark modesty panel and brass detailing.
+  box(2.65,.18,1.35,mat('#49372b'),-11,.98,-7.05);box(2.55,.12,1.27,mat('#8b6748'),-11,1.13,-7.05);
+  box(2.35,.72,.12,mats.metal,-11,.53,-6.48);box(.09,.78,1.12,mats.gold,-12.18,.55,-7.05);box(.09,.78,1.12,mats.gold,-9.82,.55,-7.05);
+  box(.62,.045,.34,mats.black,-11,1.24,-7.42);box(.56,.025,.28,mats.screen,-11,1.28,-7.42);
+  // Executive chair on the inner side of the desk, facing the entrance.
+  const execChair=new THREE.Group();execChair.position.set(-11,0,-8.35);scene.add(execChair);
+  box(.9,.2,.82,mats.metal,0,.68,0,execChair);box(.9,1.15,.2,mats.metal,0,1.27,-.31,execChair);
+  box(.68,.08,.62,mats.fabric,0,.82,.02,execChair);box(.68,.1,.1,mats.gold,0,1.05,-.18,execChair);
+  cyl(.09,.58,mats.metal,0,.34,.02,execChair);cyl(.42,.08,mats.metal,0,.07,.02,execChair);
+  // Guest sofa faces into the room; coffee table is between sofa and desk.
+  box(2.35,.38,.82,mats.fabric,-11,.38,-4.65);box(2.35,.78,.18,mats.fabric,-11,.77,-5.02);
+  box(.16,.52,.84,mats.fabric,-12.1,.53,-4.65);box(.16,.52,.84,mats.fabric,-9.9,.53,-4.65);
+  box(1.15,.12,.65,mat('#74543a'),-11,.48,-5.85);box(.08,.42,.08,mats.gold,-11.45,.23,-5.85);box(.08,.42,.08,mats.gold,-10.55,.23,-5.85);
+  // Executive credenza, brass trim and indoor greenery.
+  box(2.15,.72,.42,mats.wood,-14.65,.38,-9.7);box(2.15,.06,.45,mats.gold,-14.65,.77,-9.7);
+  box(1.5,.08,.5,mats.black,-14.6,1.05,-9.7);plant(-7.5,-9.5,.8);plant(-14.8,-4.1,.75);
+  cyl(.42,.08,mats.gold,-8,.07,-5.2);
   // Conference room: a real meeting table and six individual chairs.
   partition(8,-7,13,7);box(12.7,2.35,.045,mat('#a8c2cc',.22),8,1.25,-3.47);label('MEETING ROOM',8,-7);
   box(5.2,.14,1.65,mats.oak,8,.88,-7.1);for(let x=6;x<=10;x+=1.35){chair(x,-8.35,Math.PI);chair(x,-5.85,0);}box(3.2,1.45,.08,mats.black,8,1.55,-10.15);box(2.9,1.15,.025,mats.screen,8,1.58,-10.1);
