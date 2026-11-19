@@ -3,12 +3,12 @@ import * as THREE from 'three';
 import {OrbitControls} from 'three/examples/jsm/controls/OrbitControls.js';
 
 const team=[
- {id:'gm',name:'Nour',role:'General Manager',color:'#9b2634',status:'Working'},
- {id:'research',name:'Atlas',role:'Researcher',color:'#6688b8',status:'Working'},
- {id:'builder',name:'Nova',role:'Developer',color:'#4d9b83',status:'Coffee break'},
- {id:'copy',name:'Echo',role:'Content Specialist',color:'#b66f8d',status:'Working'},
- {id:'media',name:'Pixel',role:'Marketing Specialist',color:'#bd8c4d',status:'In a meeting'},
- {id:'hr',name:'Mira',role:'People Operations',color:'#5d9eaa',status:'Working'}
+ {id:'marketing',name:'عمر',role:'Marketing Specialist',color:'#9b2634',status:'Working'},
+ {id:'data',name:'مريم',role:'Data Analyst',color:'#6688b8',status:'Working'},
+ {id:'finance',name:'يوسف',role:'Finance Specialist',color:'#4d9b83',status:'Working'},
+ {id:'content',name:'سلمى',role:'Content Creator',color:'#b66f8d',status:'Working'},
+ {id:'developer',name:'زياد',role:'Software Developer',color:'#bd8c4d',status:'Working'},
+ {id:'operations',name:'نور',role:'HR & Operations',color:'#5d9eaa',status:'Working'}
 ];
 
 export default function OfficeScene(){
