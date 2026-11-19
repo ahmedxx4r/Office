@@ -41,6 +41,15 @@ export async function initStore() {
       loadJson();
     }
   } else loadJson();
+  // Ensure every persisted employee has the current provider/model profile.
+  const seedById = new Map(seedAgents.map(agent => [agent.id, agent]));
+  let profilesUpdated = false;
+  state.agents = (state.agents || []).map(agent => {
+    const seed = seedById.get(agent.id);
+    if (seed && !agent.ai) { profilesUpdated = true; return { ...seed, ...agent, ai: seed.ai }; }
+    return agent;
+  });
+  if (profilesUpdated) persist();
   // Migrate the previous demo roster to the current six-person NEXLOVA team.
   const legacyIds = new Set(['gm','hr','trainer','research','media','funnel','builder','copy','accountant','assistant']);
   if ((state.agents || []).some(agent => legacyIds.has(agent.id))) {
