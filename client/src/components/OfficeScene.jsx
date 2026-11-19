@@ -19,7 +19,7 @@ export default function OfficeScene(){
   const sphere=(r,ma,x,y,z,p=scene)=>{const o=new THREE.Mesh(new THREE.SphereGeometry(r,16,12),ma);o.position.set(x,y,z);o.castShadow=true;p.add(o);return o;};
   const plant=(x,z,s=.8)=>{cyl(.27*s,.42*s,wood,x,.21*s,z);for(let i=0;i<6;i++){const l=new THREE.Mesh(new THREE.ConeGeometry(.13*s,.85*s,8),M('#47734c'));l.position.set(x+Math.sin(i*2.4)*.18*s,.75*s,z+Math.cos(i*2.4)*.18*s);l.rotation.z=Math.sin(i*2.4)*.3;scene.add(l);}};
   const chair=(x,z,rot=0)=>{const g=new THREE.Group();g.position.set(x,0,z);g.rotation.y=rot;scene.add(g);box(.62,.15,.62,black,0,.48,0,g);box(.62,.72,.13,black,0,.85,.25,g);cyl(.055,.42,gold,0,.2,0,g);for(let i=0;i<4;i++){const a=i*Math.PI/2;box(.06,.05,.38,black,Math.sin(a)*.16,.06,Math.cos(a)*.16,g);}};
-  const desk=(x,z,rot=0)=>{const g=new THREE.Group();g.position.set(x,0,z);g.rotation.y=rot;scene.add(g);box(1.85,.14,1.15,wood2,0,.96,0,g);for(const dx of [-.78,.78])for(const dz of [-.43,.43])box(.08,.9,.08,black,dx,.46,dz,g);box(.68,.48,.07,black,0,1.27,-.38,g);box(.6,.39,.025,screen,0,1.28,-.335,g);box(.48,.035,.22,cream,0,1.06,.22,g);chair(0,1.05,Math.PI);};
+  const desk=(x,z,rot=0,withChair=true)=>{const g=new THREE.Group();g.position.set(x,0,z);g.rotation.y=rot;scene.add(g);box(1.85,.14,1.15,wood2,0,.96,0,g);for(const dx of [-.78,.78])for(const dz of [-.43,.43])box(.08,.9,.08,black,dx,.46,dz,g);box(.68,.48,.07,black,0,1.27,-.38,g);box(.6,.39,.025,screen,0,1.28,-.335,g);box(.48,.035,.22,cream,0,1.06,.22,g);if(withChair)chair(0,1.05,Math.PI);};
   const person=(x,z,color)=>{const g=new THREE.Group();g.position.set(x,0,z);scene.add(g);cyl(.19,.3,black,0,.52,.3,g);box(.55,.14,.55,black,0,.52,.3,g);box(.55,.68,.12,black,0,.85,.54,g);const body=new THREE.Mesh(new THREE.CapsuleGeometry(.21,.36,4,8),M(color));body.position.set(0,1.1,-.06);g.add(body);sphere(.16,skin,0,1.52,-.12,g);sphere(.165,black,0,1.58,-.12,g);box(.11,.4,.11,M(color),-.22,1.14,-.27,g).rotation.x=-.65;box(.11,.4,.11,M(color),.22,1.14,-.27,g).rotation.x=-.65;box(.13,.46,.13,black,-.12,.25,.05,g).rotation.x=-.2;box(.13,.46,.13,black,.12,.25,.05,g).rotation.x=-.2;};
   const sofa=(x,z,w=2.2,color=fabric)=>{box(w,.38,.78,color,x,.38,z);box(w,.72,.16,color,x,.72,z+.3);for(const dx of [-w/2+.12,w/2-.12])box(.16,.48,.82,color,x+dx,.52,z);};
   const roundTable=(x,z,r=.55)=>{cyl(r,.12,wood2,x,.68,z);cyl(.07,.62,black,x,.31,z);};
@@ -37,8 +37,10 @@ export default function OfficeScene(){
   room(3,-7,9,7,'BOARDROOM');box(5,.16,1.75,wood2,3,.94,-7.1);for(let x=.8;x<=5.2;x+=1.45){chair(x,-8.35,0);chair(x,-5.85,Math.PI);}box(3.4,1.65,.1,black,3,1.75,-10.25);box(3.1,1.35,.035,screen,3,1.78,-10.18);plant(6.7,-9.2,.55);
   room(12,-7,8,7,'MEETING');box(4.4,.16,1.5,wood2,12,.94,-7.1);for(let x=10.3;x<=13.7;x+=1.65){chair(x,-8.25);chair(x,-5.95,Math.PI);}box(2.8,1.5,.1,black,12,1.65,-10.25);box(2.5,1.2,.035,screen,12,1.68,-10.18);
   // Main open-plan work area: eight individual desks, generous aisles and no bench tables.
-  const stations=[[-12,-1.6],[-5,-1.6],[2,-1.6],[9,-1.6],[-12,4.2],[-5,4.2],[2,4.2],[9,4.2]];
-  stations.forEach(([x,z],i)=>{desk(x,z);person(x,z+1.55,team[i][1]);plant(x+1.2,z-.35,.38);});
+  // Two clean rows of individual desks. All monitors face north (-Z); staff sit south of each desk.
+  // Stations are shifted between room entrances, leaving a clear approach corridor to every door.
+  const stations=[[-10,.1],[-3,.1],[4,.1],[10,.1],[-10,4.7],[-3,4.7],[4,4.7],[10,4.7]];
+  stations.forEach(([x,z],i)=>{desk(x,z,0,false);person(x,z+1.42,team[i][1]);});
   // Reception and branded feature wall.
   box(4.1,.18,1.05,black,-14,.95,2.5);box(5,.12,.22,wood,-14,1.45,-1.65);box(5,2.7,.18,wood,-14,1.55,-1.85);box(1.1,1.2,.06,red,-14,2.1,-1.73);
   const cv=document.createElement('canvas');cv.width=1024;cv.height=256;const ctx=cv.getContext('2d');ctx.fillStyle='#f5e8d2';ctx.font='bold 112px Arial';ctx.textAlign='center';ctx.fillText('NEXLOVA',512,155);const tx=new THREE.CanvasTexture(cv);tx.colorSpace=THREE.SRGBColorSpace;const logo=new THREE.Sprite(new THREE.SpriteMaterial({map:tx,transparent:true}));logo.position.set(-14,1.25,-1.68);logo.scale.set(3.5,.85,1);scene.add(logo);
