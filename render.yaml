@@ -2,7 +2,7 @@ services:
   - type: web
     name: office-api
     runtime: node
-    plan: starter
+    plan: free
     region: frankfurt
     branch: main
     buildCommand: npm install

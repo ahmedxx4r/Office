@@ -2,16 +2,23 @@
   "name": "office",
   "version": "1.0.0",
   "private": true,
-  "workspaces": ["server", "client"],
+  "workspaces": [
+    "server",
+    "client"
+  ],
   "scripts": {
     "dev": "concurrently -n API,WEB -c cyan,magenta \"npm:dev:server\" \"npm:dev:client\"",
     "dev:server": "npm --workspace server run dev",
     "dev:client": "npm --workspace client run dev",
     "build": "npm --workspace client run build",
     "start": "npm --workspace server start",
-    "test": "npm --workspace server test"
+    "test": "npm --workspace server test",
+    "check": "npm test && npm run build"
   },
   "devDependencies": {
     "concurrently": "^9.1.2"
+  },
+  "engines": {
+    "node": ">=22"
   }
 }
