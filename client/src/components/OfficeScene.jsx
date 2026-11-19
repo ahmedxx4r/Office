@@ -44,7 +44,8 @@ box(4.8,.22,1.1,wood2,14,.9,-1.9);box(4.8,1.5,.14,black,14,1.7,-2.45);box(4.4,.8
 desk(-15,7,2.1,1.1);desk(-15,4.8,2.1,1.1);box(2.2,2.2,.15,black,-16,1.3,6.2);box(1.8,1.2,.05,screen,-16,1.4,6.1);plant(-12,9,.8);
 for(let x=-10;x<=-7;x+=1.6){partition(x,7.7,1.35,2.2,2.2);sofa(x,7.6,.9,red);}
 box(5,.12,4,green,-4.5,.05,8.4);box(2.3,.22,1.1,wood2,-4.5,.55,8.4);chair(-6.5,8.4,red);chair(-2.5,8.4,red);sphere(.48,red,-6.2,.55,9.5);
-box(5,.2,.95,wood2,2,.85,9);for(let x=0;x<=4;x+=1)chair(x,10.1);table(7,8.2,.75);chair(6.2,8.2);chair(7.8,8.2);plant(4.7,9.7,.75);
+// Removed the long communal table and its row of chairs; keep this area open.
+table(7,8.2,.75);chair(6.2,8.2);chair(7.8,8.2);plant(4.7,9.7,.75);
 partition(12,8.1,5.2,5.2,2.5);box(1.5,.08,1.1,black,10.4,.8,6.8);box(1.5,.08,1.1,black,12.4,.8,6.8);cyl(.28,.4,cream,10.4,.6,8);cyl(.28,.4,cream,12.4,.6,8);box(1.3,1.5,.08,wood,14.2,1,9.5);plant(15.8,9.7,.7);
 
 // Fill the previously empty rooms with functional furniture and visible room identities
