@@ -11,7 +11,7 @@ const team=[
  {id:'operations',name:'نور',role:'HR & Operations',color:'#5d9eaa',status:'Working'}
 ];
 
-export default function OfficeScene(){
+export default function OfficeScene({workingAgentIds=[]}){
  const mount=useRef(null),[cameraMode,setCameraMode]=useState('top'),[selected,setSelected]=useState(null);
  useEffect(()=>{
   const host=mount.current;if(!host)return;
@@ -89,7 +89,7 @@ export default function OfficeScene(){
    const home=new THREE.Vector3(stations[i][0],0,stations[i][1]+1.05);
    const destinations=[home,new THREE.Vector3(13,0,-1),new THREE.Vector3(12,0,5),new THREE.Vector3(8,0,-7.4)];
    const targetIndex=[0,0,1,0,3,0][i];
-   g.position.copy(home);g.rotation.y=Math.PI;g.userData={home,destinations,target:destinations[targetIndex].clone(),phase:Math.random()*6.28,walking:false,armL,armR,legL,legR,body,person,index:i};
+   g.position.copy(home);g.rotation.y=Math.PI;g.userData={home,phase:i*.9,walking:false,armL,armR,legL,legR,body,person,index:i,workPhase:i*.7};
    return g;
   });
   // Coffee corner with an actual counter, espresso machine, mugs and shelves.
@@ -123,14 +123,59 @@ export default function OfficeScene(){
   const onPointer=e=>{const r=renderer.domElement.getBoundingClientRect();pointer.x=((e.clientX-r.left)/r.width)*2-1;pointer.y=-((e.clientY-r.top)/r.height)*2+1;raycaster.setFromCamera(pointer,camera);const hits=raycaster.intersectObjects(people,true);if(hits.length){let o=hits[0].object;while(o.parent&&!people.includes(o))o=o.parent;const idx=people.indexOf(o);if(idx>=0)setSelected(idx);}};
   renderer.domElement.addEventListener('pointerdown',onPointer);
   const resize=()=>{const w=host.clientWidth||900,h=host.clientHeight||650;camera.aspect=w/h;camera.updateProjectionMatrix();renderer.setSize(w,h);};resize();const obs=new ResizeObserver(resize);obs.observe(host);
-  // Movement is intentionally paused: all six team members remain stationary at their assigned desks.
-  let raf;const animate=()=>{raf=requestAnimationFrame(animate);controls.update();renderer.render(scene,camera);};animate();
+  // Subtle office life: assigned employees type at their desks; one teammate takes a short walk every five minutes.
+  const breakSpots=[new THREE.Vector3(12.2,0,-.35),new THREE.Vector3(11.5,0,8.1),new THREE.Vector3(13.2,0,1.1)];
+  const breakInterval=300000,walkDuration=8500,breakDuration=9000;
+  let nextBreakAt=performance.now()+breakInterval,breakIndex=0,activeWalker=null,raf,lastFrame=performance.now();
+  const ease=t=>t*t*(3-2*t);
+  const startBreak=now=>{
+   if(activeWalker!==null||!people.length)return;
+   const idx=breakIndex%people.length;breakIndex++;
+   const person=people[idx],spot=breakSpots[(breakIndex-1)%breakSpots.length];
+   activeWalker={idx,person,from:person.position.clone(),to:spot.clone(),started:now,phase:'out',pauseUntil:0};
+   person.userData.walking=true;
+  };
+  const animate=()=>{
+   raf=requestAnimationFrame(animate);
+   const now=performance.now(),dt=Math.min((now-lastFrame)/1000,.05);lastFrame=now;
+   if(activeWalker===null&&now>=nextBreakAt){startBreak(now);nextBreakAt=now+breakInterval;}
+   people.forEach((p,i)=>{
+    const u=p.userData,working=workingAgentIds.includes(u.person.id);
+    const typing=working&&activeWalker?.idx!==i;
+    const wave=Math.sin(now/115+i*1.7);
+    if(typing){
+     u.armL.rotation.x=-.72+wave*.075;u.armR.rotation.x=-.72-Math.sin(now/105+i)*.075;
+     u.armL.rotation.z=-.12;u.armR.rotation.z=.12;
+     u.body.rotation.x=Math.sin(now/850+i)*.012;
+    }else if(activeWalker?.idx!==i){
+     u.armL.rotation.x=0;u.armR.rotation.x=0;u.armL.rotation.z=0;u.armR.rotation.z=0;u.body.rotation.x=0;
+    }
+    if(u.walking){
+     const w=activeWalker;if(!w)return;
+     if(w.phase==='out'){
+      const t=Math.min(1,(now-w.started)/walkDuration),e=ease(t);
+      p.position.lerpVectors(w.from,w.to,e);p.rotation.y=Math.atan2(w.to.x-w.from.x,w.to.z-w.from.z);
+      u.legL.rotation.x=Math.sin(now/105)*.42;u.legR.rotation.x=-Math.sin(now/105)*.42;
+      u.armL.rotation.x=Math.sin(now/105+Math.PI)*.28;u.armR.rotation.x=-Math.sin(now/105+Math.PI)*.28;
+      if(t>=1){w.phase='pause';w.pauseUntil=now+breakDuration;u.legL.rotation.x=0;u.legR.rotation.x=0;}
+     }else if(w.phase==='pause'&&now>=w.pauseUntil){w.phase='back';w.started=now;w.from=p.position.clone();w.to=u.home.clone();}
+     else if(w.phase==='back'){
+      const t=Math.min(1,(now-w.started)/walkDuration),e=ease(t);
+      p.position.lerpVectors(w.from,w.to,e);p.rotation.y=Math.PI;
+      u.legL.rotation.x=Math.sin(now/105)*.42;u.legR.rotation.x=-Math.sin(now/105)*.42;
+      u.armL.rotation.x=Math.sin(now/105+Math.PI)*.28;u.armR.rotation.x=-Math.sin(now/105+Math.PI)*.28;
+      if(t>=1){p.position.copy(u.home);u.walking=false;u.armL.rotation.x=0;u.armR.rotation.x=0;u.legL.rotation.x=0;u.legR.rotation.x=0;activeWalker=null;}
+     }
+    }
+   });
+   controls.update();renderer.render(scene,camera);
+  };animate();
   host.__officeCamera={set:(mode)=>{if(mode==='top'){camera.position.set(0,34,.1);controls.target.set(0,0,0);controls.minDistance=8;controls.maxDistance=55;controls.maxPolarAngle=Math.PI*.49;}else{camera.position.set(-2,2.4,8);controls.target.set(-2,1.7,0);controls.minDistance=.1;controls.maxDistance=12;controls.maxPolarAngle=Math.PI*.92;}controls.update();}};
   return()=>{cancelAnimationFrame(raf);obs.disconnect();renderer.domElement.removeEventListener('pointerdown',onPointer);controls.dispose();renderer.dispose();if(renderer.domElement.parentNode===host)host.removeChild(renderer.domElement);scene.traverse(o=>{if(o.geometry)o.geometry.dispose();if(o.material){const ms=Array.isArray(o.material)?o.material:[o.material];ms.forEach(m=>{if(m.map)m.map.dispose();m.dispose();});}});delete host.__officeCamera;};
  },[]);
  const changeMode=mode=>{setCameraMode(mode);mount.current?.__officeCamera?.set(mode);};
- const chosen=selected===null?null:team[selected];
- return <div className="office-scene office-three" ref={mount} aria-label="Interactive realistic 3D NEXLOVA office">
+ const chosen=selected===null?null:{...team[selected],status:team[selected]&&workingAgentIds.includes(team[selected].id)?'Working at desk':'At the office'};
+ return <div className="office-scene office-three" ref={mount} aria-label="Interactive realistic 3D ISystem office">
   <div className="office-scene-toolbar"><div className="office-view-switch"><button className={cameraMode==='top'?'chosen':''} onClick={()=>changeMode('top')}>Top View</button><button className={cameraMode==='inside'?'chosen':''} onClick={()=>changeMode('inside')}>First Person</button></div><span className="office-staff-count">6 TEAM MEMBERS</span></div>
   {chosen&&<div className="office-agent-card"><button onClick={()=>setSelected(null)} aria-label="Close">×</button><b>{chosen.name}</b><span>{chosen.role}</span><small>{chosen.status}</small></div>}
   <div className="scene-hint">DRAG TO ROTATE · SCROLL TO ZOOM · CLICK A TEAM MEMBER</div>
