@@ -23,14 +23,14 @@ export default function OfficeScene(){
   const sun=new THREE.DirectionalLight('#fff0dc',2.8);sun.position.set(-12,25,14);sun.castShadow=true;sun.shadow.mapSize.set(2048,2048);sun.shadow.camera.left=-22;sun.shadow.camera.right=22;sun.shadow.camera.top=20;sun.shadow.camera.bottom=-20;scene.add(sun);
   const fill=new THREE.DirectionalLight('#c4d8ff',.8);fill.position.set(16,12,-18);scene.add(fill);
   const mat=(c,r=.72)=>new THREE.MeshStandardMaterial({color:c,roughness:r});
-  const mats={floor:mat('#c8c3b9'),tile:mat('#d8d3ca'),wall:mat('#454c52'),wood:mat('#9a6945'),oak:mat('#c18d5b'),metal:mat('#333b43'),black:mat('#20262d'),screen:mat('#172c3d',.2),cream:mat('#e8dfd0'),fabric:mat('#66737c'),red:mat('#8d3435'),green:mat('#557a60'),skin:mat('#bd8d70'),gold:mat('#c6a16c',.35)};
+  const mats={floor:mat('#a79d90'),tile:mat('#b8ad9f'),wall:mat('#3e454b'),wood:mat('#806047'),oak:mat('#987b5c'),metal:mat('#333b43'),black:mat('#20262d'),screen:mat('#172c3d',.2),cream:mat('#e8dfd0'),fabric:mat('#66737c'),red:mat('#8d3435'),green:mat('#557a60'),skin:mat('#bd8d70'),gold:mat('#c6a16c',.35)};
   const box=(w,h,d,m,x,y,z,parent=scene)=>{const o=new THREE.Mesh(new THREE.BoxGeometry(w,h,d),m);o.position.set(x,y,z);o.castShadow=true;o.receiveShadow=true;parent.add(o);return o;};
   const cyl=(r,h,m,x,y,z,parent=scene)=>{const o=new THREE.Mesh(new THREE.CylinderGeometry(r,r,h,18),m);o.position.set(x,y,z);o.castShadow=true;parent.add(o);return o;};
   const sphere=(r,m,x,y,z,parent=scene)=>{const o=new THREE.Mesh(new THREE.SphereGeometry(r,16,12),m);o.position.set(x,y,z);o.castShadow=true;parent.add(o);return o;};
   const label=(txt,x,z)=>{const c=document.createElement('canvas');c.width=512;c.height=128;const ctx=c.getContext('2d');ctx.fillStyle='#f5eee4';ctx.font='bold 46px Arial';ctx.textAlign='center';ctx.fillText(txt,256,78);const t=new THREE.CanvasTexture(c);t.colorSpace=THREE.SRGBColorSpace;const s=new THREE.Sprite(new THREE.SpriteMaterial({map:t,transparent:true}));s.position.set(x,2.9,z);s.scale.set(2.7,.68,1);scene.add(s);};
   const plant=(x,z,s=1)=>{cyl(.28*s,.38*s,mats.wood,x,.19*s,z);for(let i=0;i<6;i++){const l=new THREE.Mesh(new THREE.ConeGeometry(.14*s,.85*s,8),mat('#4e805a'));l.position.set(x+Math.sin(i*2.4)*.18*s,.72*s,z+Math.cos(i*2.4)*.18*s);l.rotation.z=Math.sin(i*2.4)*.3;scene.add(l);}};
   const chair=(x,z,rot=0)=>{const g=new THREE.Group();g.position.set(x,0,z);g.rotation.y=rot;scene.add(g);box(.62,.14,.62,mats.metal,0,.47,0,g);box(.62,.68,.13,mats.metal,0,.82,.25,g);cyl(.055,.42,mats.metal,0,.2,0,g);for(let i=0;i<4;i++){const a=i*Math.PI/2;box(.055,.045,.36,mats.metal,Math.sin(a)*.16,.05,Math.cos(a)*.16,g);}return g;};
-  const desk=(x,z,rot=0)=>{const g=new THREE.Group();g.position.set(x,0,z);g.rotation.y=rot;scene.add(g);box(1.55,.13,.92,mats.oak,0,.91,0,g);for(const dx of [-.64,.64])for(const dz of [-.35,.35])box(.07,.84,.07,mats.metal,dx,.42,dz,g);box(.58,.43,.06,mats.black,0,1.19,-.29,g);box(.52,.34,.02,mats.screen,0,1.2,-.255,g);box(.44,.025,.18,mats.cream,0,1.02,.2,g);chair(x,z+1.03,Math.PI);};
+  const desk=(x,z,rot=0)=>{const g=new THREE.Group();g.position.set(x,0,z);g.rotation.y=rot;scene.add(g);box(1.55,.13,.92,mats.oak,0,.91,0,g);for(const dx of [-.64,.64])for(const dz of [-.35,.35])box(.07,.84,.07,mats.metal,dx,.42,dz,g);box(.58,.43,.06,mats.black,0,1.19,-.29,g);box(.52,.34,.02,mats.screen,0,1.2,-.255,g);box(.44,.025,.18,mats.cream,0,1.02,.2,g);chair(x,z+1.03,0);};
   // Building shell and light oak floor.
   box(32,.35,22,mats.floor,0,-.19,0);
   for(let x=-15;x<16;x+=2)for(let z=-10;z<11;z+=2)box(1.96,.016,1.96,mats.tile,x,-.005,z);
@@ -67,10 +67,11 @@ export default function OfficeScene(){
   box(4.8,.16,.85,mats.oak,13,.88,-1.7);box(4.8,1.45,.12,mats.black,13,1.65,-2.2);box(4.3,.8,.04,mats.screen,13,1.7,-2.12);
   box(1.05,.85,.72,mats.metal,11.6,1.38,-1.65);box(.65,.3,.48,mats.black,11.6,1.95,-1.65);for(let x=12.5;x<=14.8;x+=.65){cyl(.12,.07,mats.cream,x,1.05,-1.55);cyl(.065,.07,mats.gold,x,1.13,-1.55);}
   for(let y=2.35;y<=2.95;y+=.3)box(4.1,.05,.2,mats.oak,13,y,-2.35);label('COFFEE BAR',13,-1.3);
-  // Lounge: soft sofas, low coffee table, rug and greenery.
-  box(7,.04,4.2,mat('#a7a29a'),10,.03,5.8);box(2.5,.38,.82,mats.fabric,8.7,.38,5.4);box(2.5,.72,.16,mats.fabric,8.7,.75,5.72);box(.16,.5,.84,mats.fabric,7.55,.52,5.4);box(.16,.5,.84,mats.fabric,9.85,.52,5.4);
-  box(2.5,.38,.82,mats.red,12,.38,5.4);box(2.5,.72,.16,mats.red,12,.75,5.72);box(.16,.5,.84,mats.red,10.85,.52,5.4);box(.16,.5,.84,mats.red,13.15,.52,5.4);
-  cyl(.65,.12,mats.oak,10.3,.48,7);cyl(.07,.42,mats.metal,10.3,.23,7);plant(14.7,7,.85);plant(7,7,.8);label('LOUNGE',10.5,4.2);
+  // Lounge moved to the far lower-right corner, with a clear aisle from the final employee desk.
+  box(7,.04,4.2,mat('#91877b'),11.5,.03,7.65);
+  box(2.5,.38,.82,mats.fabric,10,.38,7.2);box(2.5,.72,.16,mats.fabric,10,.75,7.52);box(.16,.5,.84,mats.fabric,8.85,.52,7.2);box(.16,.5,.84,mats.fabric,11.15,.52,7.2);
+  box(2.5,.38,.82,mats.red,13,.38,7.2);box(2.5,.72,.16,mats.red,13,.75,7.52);box(.16,.5,.84,mats.red,11.85,.52,7.2);box(.16,.5,.84,mats.red,14.15,.52,7.2);
+  cyl(.65,.12,mats.oak,11.5,.48,9.05);cyl(.07,.42,mats.metal,11.5,.23,9.05);plant(15,9.2,.75);plant(8.2,9.2,.7);label('LOUNGE',11.5,6.2);
   // Reception branding and plants.
   box(3.8,.18,.9,mats.black,-13,.88,1.9);box(3.4,1.5,.06,mats.wood,-13,1.75,-1.1);
   const c=document.createElement('canvas');c.width=1024;c.height=256;const ctx=c.getContext('2d');ctx.fillStyle='#f6eee2';ctx.font='bold 112px Arial';ctx.textAlign='center';ctx.fillText('NEXLOVA',512,155);const tex=new THREE.CanvasTexture(c);tex.colorSpace=THREE.SRGBColorSpace;const logo=new THREE.Sprite(new THREE.SpriteMaterial({map:tex,transparent:true}));logo.position.set(-13,1.9,-1.02);logo.scale.set(3.4,.85,1);scene.add(logo);
@@ -80,14 +81,8 @@ export default function OfficeScene(){
   const onPointer=e=>{const r=renderer.domElement.getBoundingClientRect();pointer.x=((e.clientX-r.left)/r.width)*2-1;pointer.y=-((e.clientY-r.top)/r.height)*2+1;raycaster.setFromCamera(pointer,camera);const hits=raycaster.intersectObjects(people,true);if(hits.length){let o=hits[0].object;while(o.parent&&!people.includes(o))o=o.parent;const idx=people.indexOf(o);if(idx>=0)setSelected(idx);}};
   renderer.domElement.addEventListener('pointerdown',onPointer);
   const resize=()=>{const w=host.clientWidth||900,h=host.clientHeight||650;camera.aspect=w/h;camera.updateProjectionMatrix();renderer.setSize(w,h);};resize();const obs=new ResizeObserver(resize);obs.observe(host);
-  let frame=0,raf;const animate=()=>{raf=requestAnimationFrame(animate);const t=frame++/60;
-   people.forEach((g,i)=>{const u=g.userData;const moving=i===2||i===4;let dest=u.target;
-    if(moving){const phase=(t/13+i*.21)%1;const route=u.destinations;const seg=Math.floor(phase*route.length),a=route[seg],b=route[(seg+1)%route.length],f=(phase*route.length)%1;dest=a.clone().lerp(b,f);g.position.lerp(dest,.035);g.rotation.y=Math.atan2(b.x-a.x,b.z-a.z);u.walking=true;}
-    else{g.position.x=u.home.x+Math.sin(t*.55+i)*.025;g.position.z=u.home.z+Math.cos(t*.48+i)*.025;g.rotation.y=Math.sin(t*.3+i)*.08;}
-    const swing=moving?Math.sin(t*5+i)*.5:Math.sin(t*2+i)*.045;u.legL.rotation.x=swing;u.legR.rotation.x=-swing;u.armL.rotation.x=-swing*.7;u.armR.rotation.x=swing*.7;u.body.rotation.z=Math.sin(t*1.4+i)*.018;
-   });
-   controls.update();renderer.render(scene,camera);
-  };animate();
+  // Movement is intentionally paused: all six team members remain stationary at their assigned desks.
+  let raf;const animate=()=>{raf=requestAnimationFrame(animate);controls.update();renderer.render(scene,camera);};animate();
   host.__officeCamera={set:(mode)=>{if(mode==='top'){camera.position.set(0,34,.1);controls.target.set(0,0,0);controls.minDistance=8;controls.maxDistance=55;controls.maxPolarAngle=Math.PI*.49;}else{camera.position.set(-2,2.4,8);controls.target.set(-2,1.7,0);controls.minDistance=.1;controls.maxDistance=12;controls.maxPolarAngle=Math.PI*.92;}controls.update();}};
   return()=>{cancelAnimationFrame(raf);obs.disconnect();renderer.domElement.removeEventListener('pointerdown',onPointer);controls.dispose();renderer.dispose();if(renderer.domElement.parentNode===host)host.removeChild(renderer.domElement);scene.traverse(o=>{if(o.geometry)o.geometry.dispose();if(o.material){const ms=Array.isArray(o.material)?o.material:[o.material];ms.forEach(m=>{if(m.map)m.map.dispose();m.dispose();});}});delete host.__officeCamera;};
  },[]);
