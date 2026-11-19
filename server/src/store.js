@@ -69,6 +69,7 @@ function loadJson() {
   catch (e) { console.error('[store] State file could not be loaded:', e.message); }
 }
 export function getState() { return state; }
+export function getStoreStatus() { return { persistent: Boolean(pool), provider: pool ? 'postgresql' : 'local-json' }; }
 export function save() { persist(); }
 export function update(mutator) { mutator(state); persist(); return state; }
 export async function closeStore() { await persistChain; if (pool) await pool.end(); }
