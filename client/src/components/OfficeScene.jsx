@@ -48,10 +48,11 @@ export default function OfficeScene(){
   box(.9,.2,.82,mats.metal,0,.68,0,execChair);box(.9,1.15,.2,mats.metal,0,1.27,-.31,execChair);
   box(.68,.08,.62,mats.fabric,0,.82,.02,execChair);box(.68,.1,.1,mats.gold,0,1.05,-.18,execChair);
   cyl(.09,.58,mats.metal,0,.34,.02,execChair);cyl(.42,.08,mats.metal,0,.07,.02,execChair);
-  // Guest sofa faces into the room; coffee table is between sofa and desk.
-  box(2.35,.38,.82,mats.fabric,-11,.38,-4.65);box(2.35,.78,.18,mats.fabric,-11,.77,-4.28);
-  box(.16,.52,.84,mats.fabric,-12.1,.53,-4.65);box(.16,.52,.84,mats.fabric,-9.9,.53,-4.65);
-  box(1.15,.12,.65,mat('#74543a'),-11,.48,-5.85);box(.08,.42,.08,mats.gold,-11.45,.23,-5.85);box(.08,.42,.08,mats.gold,-10.55,.23,-5.85);
+  // Guest sofa is offset to the left of the entrance, facing the executive desk; keep doorway clear.
+  box(2.35,.38,.82,mats.fabric,-13.25,.38,-4.9);box(2.35,.78,.18,mats.fabric,-13.25,.77,-4.52);
+  box(.16,.52,.84,mats.fabric,-14.35,.53,-4.9);box(.16,.52,.84,mats.fabric,-12.15,.53,-4.9);
+  // Coffee table sits between the guest sofa and executive desk.
+  box(1.15,.12,.65,mat('#74543a'),-12.05,.48,-5.95);box(.08,.42,.08,mats.gold,-12.5,.23,-5.95);box(.08,.42,.08,mats.gold,-11.6,.23,-5.95);
   // Executive credenza, brass trim and indoor greenery.
   box(2.15,.72,.42,mats.wood,-14.65,.38,-9.7);box(2.15,.06,.45,mats.gold,-14.65,.77,-9.7);
   box(1.5,.08,.5,mats.black,-14.6,1.05,-9.7);plant(-7.5,-9.5,.8);plant(-14.8,-4.1,.75);
