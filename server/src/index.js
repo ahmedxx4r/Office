@@ -4,7 +4,7 @@ import cors from 'cors';
 import { createServer } from 'node:http';
 import { Server } from 'socket.io';
 import { v4 as uuid } from 'uuid';
-import { initStore, getState, update, closeStore } from './store.js';
+import { initStore, getState, getStoreStatus, update, closeStore } from './store.js';
 import { initTaskQueue, enqueueTask, closeQueue } from './queue.js';
 import { createAgent } from './agents.js';
 import { generateText, getAiMetrics } from './ai.js';
@@ -21,7 +21,7 @@ app.use('/api', (req,res,next) => ['/health','/auth/config','/auth/login'].inclu
 
 const io = new Server(server, { cors: { origin: allowedOrigins, methods: ['GET','POST'], credentials: true } });
 const emit = (event, payload={}) => { const entry={ id:uuid(), type:event, payload, at:new Date().toISOString() }; update(s=>s.events.unshift(entry)); io.emit('office:event',entry); io.emit('office:state',getState()); };
-app.get('/api/health', (_req,res)=>res.json({ok:true,mode:process.env.OPENAI_API_KEY?'ai':'demo',authRequired:authRequired()}));
+app.get('/api/health', (_req,res)=>res.json({ok:true,mode:process.env.OPENAI_API_KEY?'ai':'not_configured',authRequired:authRequired(),storage:getStoreStatus()}));
 app.get('/api/auth/config', (_req,res)=>res.json({required:authRequired()}));
 app.post('/api/auth/login',(req,res)=>{ if(!authRequired()) return res.json({token:null,required:false}); if(!passwordMatches(req.body?.password||'')) return res.status(401).json({error:'Invalid owner password'}); res.json({token:issueToken(),required:true}); });
 app.get('/api/state',(_req,res)=>res.json(getState()));
@@ -68,7 +68,7 @@ async function processTask(taskId) {
   update(s=>{const t=s.tasks.find(x=>x.id===taskId);if(!t)return;t.output=output;t.status='Completed';t.updatedAt=new Date().toISOString();t.logs.push({at:new Date().toISOString(),message:'Task completed'});const a=s.agents.find(x=>x.id===agent.id);if(a)a.status='idle';});
   const completed=getState().tasks.find(t=>t.id===taskId); await notifyTaskComplete(completed,getState().pushSubscriptions||[]);
   emit('task:completed',{taskId});
-  for(const next of getState().tasks.filter(t=>(t.dependsOn||[]).includes(taskId)&&t.status==='Queued')) enqueueTask(next.id).catch(console.error);
+  for(const next of getState().tasks.filter(t=>(t.dependsOn||[]).includes(taskId)&&t.status==='Queued')) { if(process.env.VERCEL==='1') await processTask(next.id); else enqueueTask(next.id).catch(console.error); }
 }
 
 app.post('/api/tasks',async(req,res)=>{
