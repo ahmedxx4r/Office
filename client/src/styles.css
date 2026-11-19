@@ -77,3 +77,48 @@ h1,h2,h3,h4,b,strong,.brand b,.topbar h1,.hero-panel h2,.panel-head h3,.login-ca
 .primary{font-size:13px;font-weight:750}
 .office-quick-task input,.office-quick-task textarea{font-size:14px}
 @media(max-width:650px){.topbar h1{font-size:23px}.nav-item{font-size:12px}.agent-card b{font-size:14px}}
+
+
+/* ISystem visual identity — intentionally scoped away from the 3D office scene */
+:root{
+  --muted:#9aa4b2;
+  --line:#29313a;
+  --panel:#151b22;
+  --purple:#e0243a;
+  --cyan:#14c3a2;
+  --isystem-red:#e0243a;
+  --isystem-teal:#14c3a2;
+  --isystem-charcoal:#0b0f14;
+  --isystem-surface:#202832;
+}
+body{background:radial-gradient(ellipse at 78% 0%,#17272a 0,transparent 38%),radial-gradient(ellipse at 8% 25%,#29171d 0,transparent 34%),#0b0f14;color:#f4f6f8}
+.sidebar{background:#0b0f14;border-right-color:#252d35}
+.brand{gap:13px}
+.brand b{font:800 19px Inter,sans-serif;letter-spacing:-.7px;color:#f5f7fa}
+.brand small,.owner-pill small{letter-spacing:1.45px;color:#9aa4b2}
+.brand-mark.isystem-mark{position:relative;display:block;overflow:hidden;border-radius:11px;background:#171e25;border:1px solid #39434c;box-shadow:0 8px 24px #0005}
+.isystem-mark i{position:absolute;display:block;width:13px;height:30px;top:4px;left:10px;transform:skew(-28deg);border-radius:2px}
+.isystem-mark i:first-child{background:var(--isystem-red);top:3px;left:10px}
+.isystem-mark i:last-child{background:var(--isystem-teal);top:13px;left:18px;height:24px}
+.nav-item{color:#a5afb9;border-radius:9px}
+.nav-item:hover,.nav-item.active{background:linear-gradient(90deg,#e0243a24,#14c3a20d);color:#fff}
+.nav-item.active{box-shadow:inset 3px 0 var(--isystem-red)}
+.eyebrow,.workspace-label{color:#a8b2bc}
+.topbar h1{color:#f5f7fa;letter-spacing:-.8px}
+.mode-pill{color:#45e0c2;background:#10332f;border:1px solid #1a6658}
+.primary{background:linear-gradient(115deg,#e0243a,#b9152b);box-shadow:0 8px 24px #e0243a30}
+.primary:hover{filter:brightness(1.12)}
+.stat-card,.panel,.agent-card{background:linear-gradient(145deg,#171e26,#121820);border-color:#2b343e}
+.stat-card strong{color:#f5f7fa}
+.stat-card small{color:#aab4bf}
+.panel-head h3{color:#f3f5f7}
+.text-action{color:#25d4b3}
+.agent-mini,.agent-avatar{background:linear-gradient(140deg,#293640,#172129);border-color:#3d515b}
+.agent-card:hover{border-color:#14c3a2;box-shadow:0 12px 28px #14c3a214}
+.skill-tags i{background:#202b32;color:#b8c5ce}
+.task-symbol{background:#332027;color:#ff5264}
+.chat-agent.selected{background:#222b32;box-shadow:inset 2px 0 var(--isystem-teal)}
+.task-form input:focus,.task-form textarea:focus,.task-form select:focus,.login-card input:focus,.chat-compose input:focus{border-color:#14c3a2}
+.footer-line{color:#87939f}
+.owner-pill{color:#cbd3da;border-top-color:#29313a}
+/* Preserve the existing OfficeScene and every 3D-specific rule below unchanged. */
