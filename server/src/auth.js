@@ -17,7 +17,8 @@ export function verifyToken(token='') {
 }
 export function requireOwner(req, res, next) {
   if (!authRequired()) return next();
-  const token = (req.headers.authorization || '').replace(/^Bearer\\s+/i, '');
+  const header = req.headers.authorization || '';
+  const token = header.toLowerCase().startsWith('bearer ') ? header.slice(7).trim() : '';
   if (!verifyToken(token)) return res.status(401).json({ error: 'Authentication required' });
   next();
 }
