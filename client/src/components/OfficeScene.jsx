@@ -12,7 +12,8 @@ const team=[
 ];
 
 export default function OfficeScene({workingAgentIds=[]}){
- const mount=useRef(null),[cameraMode,setCameraMode]=useState('top'),[selected,setSelected]=useState(null);
+ const mount=useRef(null),workingRef=useRef(workingAgentIds),[cameraMode,setCameraMode]=useState('top'),[selected,setSelected]=useState(null);
+ workingRef.current=workingAgentIds;
  useEffect(()=>{
   const host=mount.current;if(!host)return;
   const scene=new THREE.Scene();scene.background=new THREE.Color('#211e1b');
@@ -140,7 +141,7 @@ export default function OfficeScene({workingAgentIds=[]}){
    const now=performance.now(),dt=Math.min((now-lastFrame)/1000,.05);lastFrame=now;
    if(activeWalker===null&&now>=nextBreakAt){startBreak(now);nextBreakAt=now+breakInterval;}
    people.forEach((p,i)=>{
-    const u=p.userData,working=workingAgentIds.includes(u.person.id);
+    const u=p.userData,working=workingRef.current.includes(u.person.id);
     const typing=working&&activeWalker?.idx!==i;
     const wave=Math.sin(now/115+i*1.7);
     if(typing){
