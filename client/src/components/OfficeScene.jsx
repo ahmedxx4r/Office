@@ -49,7 +49,7 @@ export default function OfficeScene(){
   box(.68,.08,.62,mats.fabric,0,.82,.02,execChair);box(.68,.1,.1,mats.gold,0,1.05,-.18,execChair);
   cyl(.09,.58,mats.metal,0,.34,.02,execChair);cyl(.42,.08,mats.metal,0,.07,.02,execChair);
   // Guest sofa faces into the room; coffee table is between sofa and desk.
-  box(2.35,.38,.82,mats.fabric,-11,.38,-4.65);box(2.35,.78,.18,mats.fabric,-11,.77,-5.02);
+  box(2.35,.38,.82,mats.fabric,-11,.38,-4.65);box(2.35,.78,.18,mats.fabric,-11,.77,-4.28);
   box(.16,.52,.84,mats.fabric,-12.1,.53,-4.65);box(.16,.52,.84,mats.fabric,-9.9,.53,-4.65);
   box(1.15,.12,.65,mat('#74543a'),-11,.48,-5.85);box(.08,.42,.08,mats.gold,-11.45,.23,-5.85);box(.08,.42,.08,mats.gold,-10.55,.23,-5.85);
   // Executive credenza, brass trim and indoor greenery.
