@@ -49,6 +49,8 @@ export default function OfficeScene(){
   // Coffee bar along the right perimeter with shelves and compact equipment.
   box(4.7,.18,1,wood2,14,.92,-1.8);box(4.7,1.65,.14,black,14,1.75,-2.35);box(4.25,.9,.035,screen,14,1.82,-2.26);for(let y=2.45;y<=3.05;y+=.3)box(4.1,.045,.22,wood2,14,y,-2.55);for(let x=12.3;x<=15.7;x+=.85){box(.36,.48,.3,black,x,1.3,-1.8);cyl(.1,.06,gold,x,1.58,-1.8);}
   // Removed the lower-left studio room and all of its contents; keep the floor open.
+  // Content studio in the lower-left corner (restored).
+  room(-13,8,7,5,'STUDIO');desk(-14,7.6);box(2.8,1.65,.12,black,-14,1.65,5.7);box(2.45,1.25,.03,screen,-14,1.68,5.62);for(let x=-15.2;x<=-12.8;x+=.6)box(.12,1.7,.12,black,x,1.2,9.8);plant(-10.5,9.5,.6);
   // Two usable call rooms, each with one chair and a desk; not tiny chair-sized cubicles.
   room(-5.5,8,5,5,'CALL ROOM');desk(-5.5,7.8);sofa(-4.5,9.4,1.1);
   // Recreation nook with compact game table and soft seating.
