@@ -60,7 +60,7 @@ export default function OfficeScene(){
    const home=new THREE.Vector3(stations[i][0],0,stations[i][1]+1.05);
    const destinations=[home,new THREE.Vector3(13,0,-1),new THREE.Vector3(12,0,5),new THREE.Vector3(8,0,-7.4)];
    const targetIndex=[0,0,1,0,3,0][i];
-   g.position.copy(home);g.userData={home,destinations,target:destinations[targetIndex].clone(),phase:Math.random()*6.28,walking:false,armL,armR,legL,legR,body,person,index:i};
+   g.position.copy(home);g.rotation.y=Math.PI;g.userData={home,destinations,target:destinations[targetIndex].clone(),phase:Math.random()*6.28,walking:false,armL,armR,legL,legR,body,person,index:i};
    return g;
   });
   // Coffee corner with an actual counter, espresso machine, mugs and shelves.
