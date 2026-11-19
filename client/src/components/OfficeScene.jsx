@@ -72,9 +72,16 @@ export default function OfficeScene(){
   box(2.5,.38,.82,mats.fabric,10,.38,7.2);box(2.5,.72,.16,mats.fabric,10,.75,7.52);box(.16,.5,.84,mats.fabric,8.85,.52,7.2);box(.16,.5,.84,mats.fabric,11.15,.52,7.2);
   box(2.5,.38,.82,mats.red,13,.38,7.2);box(2.5,.72,.16,mats.red,13,.75,7.52);box(.16,.5,.84,mats.red,11.85,.52,7.2);box(.16,.5,.84,mats.red,14.15,.52,7.2);
   cyl(.65,.12,mats.oak,11.5,.48,9.05);cyl(.07,.42,mats.metal,11.5,.23,9.05);plant(15,9.2,.75);plant(8.2,9.2,.7);label('LOUNGE',11.5,6.2);
-  // Reception branding and plants.
-  box(3.8,.18,.9,mats.black,-13,.88,1.9);box(3.4,1.5,.06,mats.wood,-13,1.75,-1.1);
-  const c=document.createElement('canvas');c.width=1024;c.height=256;const ctx=c.getContext('2d');ctx.fillStyle='#f6eee2';ctx.font='bold 112px Arial';ctx.textAlign='center';ctx.fillText('NEXLOVA',512,155);const tex=new THREE.CanvasTexture(c);tex.colorSpace=THREE.SRGBColorSpace;const logo=new THREE.Sprite(new THREE.SpriteMaterial({map:tex,transparent:true}));logo.position.set(-13,1.9,-1.02);logo.scale.set(3.4,.85,1);scene.add(logo);
+  // Reception branding: mount a large, front-facing sign directly on the back wall.
+  box(3.8,.18,.9,mats.black,-13,.88,1.9);
+  box(5.8,2.05,.16,mats.black,-10.7,2.05,-10.78);
+  box(5.95,.07,.19,mats.gold,-10.7,3.09,-10.78);box(5.95,.07,.19,mats.gold,-10.7,1.01,-10.78);
+  const c=document.createElement('canvas');c.width=1600;c.height=420;const ctx=c.getContext('2d');
+  ctx.clearRect(0,0,c.width,c.height);ctx.textAlign='center';ctx.textBaseline='middle';
+  ctx.shadowColor='#000000';ctx.shadowBlur=12;ctx.fillStyle='#fff8eb';ctx.font='900 190px Arial';ctx.fillText('NEXLOVA',800,205);
+  const tex=new THREE.CanvasTexture(c);tex.colorSpace=THREE.SRGBColorSpace;tex.anisotropy=renderer.capabilities.getMaxAnisotropy();
+  const logo=new THREE.Mesh(new THREE.PlaneGeometry(5.35,1.4),new THREE.MeshBasicMaterial({map:tex,transparent:true,side:THREE.DoubleSide,depthWrite:false}));
+  logo.position.set(-10.7,2.05,-10.68);scene.add(logo);
   plant(-15,8,.75);plant(-1,8,.7);plant(15,-9,.75);plant(4,-9,.65);plant(-15,-9,.7);
   // Pick a staff member by clicking their 3D character.
   const raycaster=new THREE.Raycaster(),pointer=new THREE.Vector2();
