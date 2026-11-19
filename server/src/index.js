@@ -32,7 +32,23 @@ app.patch('/api/agents/:id',(req,res)=>{ let found; update(s=>{ found=s.agents.f
 app.post('/api/agents/:id/activate',(req,res)=>{ let agent; update(s=>{agent=s.agents.find(a=>a.id===req.params.id);if(agent)agent.status='working';}); if(!agent)return res.status(404).json({error:'Agent not found'}); emit('agent:activated',{agentId:agent.id}); res.json(agent); });
 app.post('/api/agents/:id/deactivate',(req,res)=>{ let agent; update(s=>{agent=s.agents.find(a=>a.id===req.params.id);if(agent)agent.status='idle';}); if(!agent)return res.status(404).json({error:'Agent not found'}); emit('agent:deactivated',{agentId:agent.id}); res.json(agent); });
 
-const chooseAgent = role => { const agents=getState().agents; const exact=agents.find(a=>a.role?.toLowerCase()===String(role||'').toLowerCase()); const key=String(role||'').toLowerCase(); const map={marketing:'media',ads:'media',automation:'funnel',development:'builder',product:'builder',content:'copy',writing:'copy',finance:'accountant',research:'research',hr:'hr',training:'trainer',operations:'assistant'}; return exact||agents.find(a=>a.id===map[key])||agents.find(a=>a.id==='builder')||agents[0]; };
+const chooseAgent = (roleOrTask='') => {
+ const agents=getState().agents;
+ const value=String(roleOrTask||'').toLowerCase();
+ const rules=[
+  {id:'marketing',keys:['marketing','market','ads','advert','campaign','social media','seo','brand','تسويق','اعلان','إعلان','حملة','سوشيال']},
+  {id:'data',keys:['data','analytics','analyst','dashboard','sql','excel','statistics','dataset','تحليل بيانات','داتا','احصاء','إحصاء']},
+  {id:'finance',keys:['finance','budget','accounting','cash flow','forecast','invoice','financial','ميزانية','محاسبة','مالية','تكاليف']},
+  {id:'content',keys:['content','copywriting','copy','script','caption','article','post','كتابة','محتوى','سكريبت','بوست']},
+  {id:'developer',keys:['developer','development','code','coding','api','website','app','bug','automation','برمجة','كود','موقع','تطبيق','باك اند','فرونت']},
+  {id:'operations',keys:['hr','human resources','operations','process','onboarding','hiring','schedule','project coordination','موارد بشرية','عمليات','توظيف','تنظيم']}
+ ];
+ const normalized=value.trim();
+ const exact=agents.find(a=>a.id===normalized||a.role?.toLowerCase()===normalized||a.department?.toLowerCase()===normalized);
+ if(exact)return exact;
+ const match=rules.find(rule=>rule.keys.some(key=>value.includes(key)));
+ return agents.find(a=>a.id===match?.id)||agents.find(a=>a.id==='operations')||agents[0];
+};
 
 async function processTask(taskId) {
   const task=getState().tasks.find(t=>t.id===taskId&&t.status==='Queued'); if(!task)return;
