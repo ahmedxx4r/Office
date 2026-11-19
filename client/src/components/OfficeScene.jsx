@@ -13,7 +13,7 @@ const box=(w,h,d,ma,x,y,z,p=scene)=>{const o=new THREE.Mesh(new THREE.BoxGeometr
 const cyl=(r,h,ma,x,y,z,p=scene)=>{const o=new THREE.Mesh(new THREE.CylinderGeometry(r,r,h,16),ma);o.position.set(x,y,z);o.castShadow=true;o.receiveShadow=true;p.add(o);return o;};
 const sphere=(r,ma,x,y,z,p=scene)=>{const o=new THREE.Mesh(new THREE.SphereGeometry(r,14,10),ma);o.position.set(x,y,z);o.castShadow=true;p.add(o);return o;};
 const room=(x,z,w,d)=>{box(w,.38,d,floor,x,-.22,z);for(let i=0;i<Math.floor(w/2);i++)for(let j=0;j<Math.floor(d/2);j++)box(1.96,.025,1.96,tile,x-w/2+1+i*2,-.015,z-d/2+1+j*2);};
-const partition=(x,z,w,d,h=2.7)=>{const gap=1.35;box(w,h,.13,wall,x,h/2,z-d/2);box((w-gap)/2,h,.13,wall,x-(w+gap)/4,h/2,z+d/2);box((w-gap)/2,h,.13,wall,x+(w+gap)/4,h/2,z+d/2);box(.13,h,d,wall,x-w/2,h/2,z);box(.13,h,d,wall,x+w/2,h/2,z);box(gap+.12,.12,.18,gold,x,h,z+d/2);const door=new THREE.Group();door.position.set(x-gap/2,.05,z+d/2);scene.add(door);box(gap-.08,2.45,.09,wood, (gap-.08)/2,1.22,0,door);box(.07,.08,.12,gold,gap-.22,1.2,.08,door);door.rotation.y=-.72;};
+const partition=(x,z,w,d,h=2.7)=>{const gap=Math.min(1.25,Math.max(.9,w-.35));box(w,h,.13,wall,x,h/2,z-d/2);box((w-gap)/2,h,.13,wall,x-(w+gap)/4,h/2,z+d/2);box((w-gap)/2,h,.13,wall,x+(w+gap)/4,h/2,z+d/2);box(.13,h,d,wall,x-w/2,h/2,z);box(.13,h,d,wall,x+w/2,h/2,z);box(.08,h,.08,gold,x-gap/2,h/2,z+d/2);box(.08,h,.08,gold,x+gap/2,h/2,z+d/2);const door=new THREE.Group();door.position.set(x-gap/2,.05,z+d/2);scene.add(door);box(gap-.08,2.35,.09,wood,(gap-.08)/2,1.17,0,door);box(.06,.08,.12,gold,gap-.2,1.16,.08,door);door.rotation.y=-.55;};
 const chair=(x,z,ma=black)=>{box(.62,.16,.62,ma,x,.5,z);box(.62,.72,.13,ma,x,.88,z+.25);cyl(.06,.5,gold,x,.22,z);};
 const desk=(x,z,w=2.1,d=1.1)=>{box(w,.13,d,wood2,x,.92,z);for(const dx of [-w*.42,w*.42])for(const dz of [-d*.38,d*.38])box(.09,.88,.09,black,x+dx,.45,z+dz);box(.55,.06,.28,screen,x,.99,z-.22);box(.48,.025,.18,cream,x,.99,z+.18);chair(x,z+d*.75);};
 const plant=(x,z,k=1)=>{cyl(.32*k,.5*k,wood,x,.25*k,z);for(let i=0;i<7;i++){const leaf=new THREE.Mesh(new THREE.ConeGeometry(.13*k,.9*k,7),M('#47734c'));leaf.position.set(x+Math.sin(i*2.4)*.23*k,.85*k,z+Math.cos(i*2.4)*.23*k);leaf.rotation.z=Math.sin(i*2.4)*.35;scene.add(leaf);}};
@@ -26,10 +26,10 @@ partition(-12,-7,9,7);partition(-4.7,-7,4.8,7);partition(2,-7,8.2,7);partition(1
 for(const x of [-15,-10,-6,-2,2,6,10,14])box(2,.95,.08,glass,x,1.05,-3.45);
 desk(-13,-7,2.5,1.35);sofa(-14.4,-9,1.5);table(-12.2,-9.1,.5);plant(-16,-9,.8);box(2.6,1.5,.18,wood,-13,1.3,-10.35);plant(-9,-9,.7);
 desk(-5,-7,2,1.2);desk(-5,-5,1.8,1);plant(-3.2,-9,.6);
-// Boardroom
-box(4.8,.18,1.8,wood2,2,.95,.95);for(let x=-.3;x<=4.3;x+=1.15){chair(x,-.3);chair(x,-2.3);}box(3,.95,.08,screen,2,2.7,-10.22);box(2.6,.035,.03,red,2,2.7,-10.15);
-// Conference room
-box(4.3,.18,1.8,wood2,11,.95,.9);for(let x=8.8;x<=13.2;x+=1.1){chair(x,-.3);chair(x,-2.3);}plant(15,-9,.8);
+// Boardroom: meeting table and chairs stay within room boundaries
+box(4.4,.18,1.55,wood2,2,.95,-7);for(let x=.1;x<=3.9;x+=1.25){chair(x,-8.25);chair(x,-5.75);}box(3,.95,.08,screen,2,2.7,-10.22);box(2.6,.035,.03,red,2,2.7,-10.15);
+// Conference room: compact table and chairs clear of entrance
+box(3.5,.18,1.45,wood2,11,.95,-7);for(let x=9.6;x<=12.4;x+=1.35){chair(x,-8.2);chair(x,-5.8);}plant(14.6,-9,.65);
 // Eight individual executive-style workstations — no shared bench tables
 const workstations=[[-11,-2.1],[-4,-2.1],[3,-2.1],[10,-2.1],[-11,4.1],[-4,4.1],[3,4.1],[10,4.1]];
 workstations.forEach(([x,z],i)=>{const w=2.35,d=1.35;box(w,.16,d,wood2,x,.98,z);for(const dx of [-1,1])for(const dz of [-.52,.52])box(.09,.92,.09,black,x+dx,.48,z+dz);box(.78,.62,.09,black,x,1.38,z-.48);box(.68,.48,.025,screen,x,1.39,z-.425);box(.58,.04,.28,cream,x,1.09,z+.22);box(.26,.025,.2,black,x-.56,1.09,z+.22);box(.18,.04,.18,gold,x+.55,1.1,z+.22);person(x,z+1.42,team[i][1]);plant(x+1.35,z-.35,.48);});
@@ -42,27 +42,27 @@ sofa(11,1.7,2.7);sofa(14,1.6,2.3,red);sofa(12.5,4.1,2.4);table(12.4,2.9,.8);chai
 box(4.8,.22,1.1,wood2,14,.9,-1.9);box(4.8,1.5,.14,black,14,1.7,-2.45);box(4.4,.85,.05,screen,14,1.8,-2.35);box(4.5,.04,.04,gold,14,1.35,-2.3);for(let x=12.2;x<=15.8;x+=.8){box(.35,.35,.32,black,x,1.2,-1.8);cyl(.13,.05,gold,x,1.4,-1.8);}for(const x of [12,15.5]){table(x,0,.58);chair(x-.65,-.1);chair(x+.65,-.1);}
 // Studio and call rooms, recreation, communal counter and utility rooms
 desk(-15,7,2.1,1.1);desk(-15,4.8,2.1,1.1);box(2.2,2.2,.15,black,-16,1.3,6.2);box(1.8,1.2,.05,screen,-16,1.4,6.1);plant(-12,9,.8);
-for(let x=-10;x<=-7;x+=1.6){partition(x,7.7,1.35,2.2,2.2);sofa(x,7.6,.9,red);}
+// Removed undersized phone cubicles.
 box(5,.12,4,green,-4.5,.05,8.4);box(2.3,.22,1.1,wood2,-4.5,.55,8.4);chair(-6.5,8.4,red);chair(-2.5,8.4,red);sphere(.48,red,-6.2,.55,9.5);
 // Removed the long communal table and its row of chairs; keep this area open.
-table(7,8.2,.75);chair(6.2,8.2);chair(7.8,8.2);plant(4.7,9.7,.75);
+table(2.5,8.5,.62);chair(1.7,8.5);chair(3.3,8.5);table(6.2,8.5,.62);chair(5.4,8.5);chair(7,8.5);plant(4.3,9.7,.65);
 partition(12,8.1,5.2,5.2,2.5);box(1.5,.08,1.1,black,10.4,.8,6.8);box(1.5,.08,1.1,black,12.4,.8,6.8);cyl(.28,.4,cream,10.4,.6,8);cyl(.28,.4,cream,12.4,.6,8);box(1.3,1.5,.08,wood,14.2,1,9.5);plant(15.8,9.7,.7);
 
 // Fill the previously empty rooms with functional furniture and visible room identities
 // Research / quiet office
-box(1.4,1.25,.55,wood,-5.8, .65,-9.4);box(1.2,.08,.42,black,-5.8,1.32,-9.4);for(let z=-9.8;z<=-8.8;z+=.45)box(.9,.035,.04,cream,-5.8,1.55,z);
-desk(-3.8,-7.8,1.65,1.05);plant(-3.1,-9.7,.65);
+box(1.5,1.7,.45,wood,-5.8,.85,-9.4);for(let y=.3;y<1.7;y+=.42)box(1.35,.035,.4,gold,-5.8,y,-9.15);desk(-3.8,-7,1.45,.9);chair(-3.8,-5.9);plant(-3.1,-9.7,.55);
 // Boardroom storage, screen and individual conference chairs
-box(2.2,1.5,.3,wood,4.8, .8,-9.6);for(let y=.35;y<1.5;y+=.35)box(2.05,.035,.28,gold,4.8,y,-9.4);box(3.2,1.75,.12,black,2,1.75,-10.25);box(2.8,1.35,.04,screen,2,1.78,-10.16);
-for(let x=-.2;x<=4.2;x+=1.1){chair(x,-4.8);chair(x,-9.2);}
+box(1.5,1.55,.3,wood,4.65,.8,-9.55);for(let y=.35;y<1.5;y+=.35)box(1.35,.035,.28,gold,4.65,y,-9.35);box(3.2,1.75,.12,black,2,1.75,-10.25);box(2.8,1.35,.04,screen,2,1.78,-10.16);
+// Removed duplicate chairs that were outside the boardroom.
 // Meeting room storage and display
-box(2.6,1.35,.35,wood,14.1,.68,-9.5);for(let y=.35;y<1.25;y+=.3)box(2.4,.035,.32,gold,14.1,y,-9.3);box(2.8,1.6,.12,black,11,1.65,-10.25);box(2.5,1.25,.04,screen,11,1.68,-10.16);
+box(1.6,1.45,.35,wood,14.15,.73,-9.5);for(let y=.35;y<1.35;y+=.3)box(1.4,.035,.32,gold,14.15,y,-9.3);box(2.8,1.6,.12,black,11,1.65,-10.25);box(2.5,1.25,.04,screen,11,1.68,-10.16);
 // Reception waiting chairs and filing shelves
 sofa(-15.1,1.2,1.7);table(-12.8,1.4,.55);plant(-16,2.6,.8);box(1.2,2,.4,wood,-9.5,1,-1.2);for(let y=.35;y<1.8;y+=.4)box(1.12,.035,.38,gold,-9.5,y,-.98);
 // Studio gets recording desk, monitor wall and acoustic panels
 box(2.8,.16,1.05,wood2,-14.7,.95,8.6);for(let x=-16;x<=-13;x+=.5)box(.08,1.8,.12,black,x,1.35,10.1);box(2.5,1.3,.1,screen,-15,1.8,6.8);desk(-14.7,6.4,1.7,1);
 // Call booths with doors and seating
-for(let x=-10;x<=-7;x+=1.6){box(.08,2.2,.08,gold,x-.62,1.1,6.6);box(.08,2.2,.08,gold,x+.62,1.1,6.6);box(1.18,.08,.08,gold,x,2.18,6.6);sofa(x,7.7,.85,red);box(.65,1.65,.06,wood,x,1,8.55);}
+// Two proper private call booths, each with one compact desk and one chair
+for(const x of [-9.5,-6.2]){box(2.7,.12,3.1,floor,x,.02,7.7);box(2.7,2.25,.12,wall,x,1.12,6.15);box(.12,2.25,3.1,wall,x-1.35,1.12,7.7);box(.12,2.25,3.1,wall,x+1.35,1.12,7.7);box(1.35,.1,.08,gold,x,2.22,6.15);desk(x,7.1,1.25,.8);plant(x+.9,8.7,.4);}
 // Lounge receives low tables, sideboard, cushions and greenery
 table(10.4,4.2,.55);table(14.8,3.4,.48);box(2.2,.8,.35,wood,15.5, .4,5.7);for(let y=.25;y<.9;y+=.28)box(2,.035,.3,gold,15.5,y,5.52);plant(9.3,5.2,.9);plant(16,1.2,.9);
 // Coffee corner shelves, espresso machines and menu display
