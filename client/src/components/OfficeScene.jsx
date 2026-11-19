@@ -15,18 +15,22 @@ export default function OfficeScene(){
  const mount=useRef(null),[cameraMode,setCameraMode]=useState('top'),[selected,setSelected]=useState(null);
  useEffect(()=>{
   const host=mount.current;if(!host)return;
-  const scene=new THREE.Scene();scene.background=new THREE.Color('#d8dfe5');
+  const scene=new THREE.Scene();scene.background=new THREE.Color('#211e1b');
   const camera=new THREE.PerspectiveCamera(42,1,.1,180);camera.position.set(0,34,.1);
-  const renderer=new THREE.WebGLRenderer({antialias:true,powerPreference:'high-performance'});renderer.setPixelRatio(Math.min(devicePixelRatio||1,1.6));renderer.shadowMap.enabled=true;renderer.shadowMap.type=THREE.PCFSoftShadowMap;renderer.outputColorSpace=THREE.SRGBColorSpace;renderer.toneMapping=THREE.ACESFilmicToneMapping;renderer.toneMappingExposure=1.15;host.appendChild(renderer.domElement);
+  const renderer=new THREE.WebGLRenderer({antialias:true,powerPreference:'high-performance'});renderer.setPixelRatio(Math.min(devicePixelRatio||1,1.6));renderer.shadowMap.enabled=true;renderer.shadowMap.type=THREE.PCFSoftShadowMap;renderer.outputColorSpace=THREE.SRGBColorSpace;renderer.toneMapping=THREE.ACESFilmicToneMapping;renderer.toneMappingExposure=1.28;host.appendChild(renderer.domElement);
   const controls=new OrbitControls(camera,renderer.domElement);controls.target.set(0,0,0);controls.enableDamping=true;controls.dampingFactor=.07;controls.maxPolarAngle=Math.PI*.49;controls.minDistance=8;controls.maxDistance=55;
-  scene.add(new THREE.HemisphereLight('#ffffff','#8c8277',2.1));
-  const sun=new THREE.DirectionalLight('#fff0dc',2.8);sun.position.set(-12,25,14);sun.castShadow=true;sun.shadow.mapSize.set(2048,2048);sun.shadow.camera.left=-22;sun.shadow.camera.right=22;sun.shadow.camera.top=20;sun.shadow.camera.bottom=-20;scene.add(sun);
-  const fill=new THREE.DirectionalLight('#c4d8ff',.8);fill.position.set(16,12,-18);scene.add(fill);
+  scene.add(new THREE.HemisphereLight('#ffe8c9','#34271f',1.05));
+  const sun=new THREE.DirectionalLight('#ffd49a',1.75);sun.position.set(-12,25,14);sun.castShadow=true;sun.shadow.mapSize.set(2048,2048);sun.shadow.camera.left=-22;sun.shadow.camera.right=22;sun.shadow.camera.top=20;sun.shadow.camera.bottom=-20;scene.add(sun);
+  const fill=new THREE.DirectionalLight('#f3c995',.42);fill.position.set(16,12,-18);scene.add(fill);
   const mat=(c,r=.72)=>new THREE.MeshStandardMaterial({color:c,roughness:r});
-  const mats={floor:mat('#a79d90'),tile:mat('#b8ad9f'),wall:mat('#3e454b'),wood:mat('#806047'),oak:mat('#987b5c'),metal:mat('#333b43'),black:mat('#20262d'),screen:mat('#172c3d',.2),cream:mat('#e8dfd0'),fabric:mat('#66737c'),red:mat('#8d3435'),green:mat('#557a60'),skin:mat('#bd8d70'),gold:mat('#c6a16c',.35)};
+  const mats={floor:mat('#756b5e'),tile:mat('#928574'),wall:mat('#292522'),wood:mat('#513725'),oak:mat('#805b3d'),metal:mat('#292725'),black:mat('#171615'),screen:mat('#101a20',.18),cream:mat('#e8d8bd'),fabric:mat('#75675c'),red:mat('#873c31'),green:mat('#49634a'),skin:mat('#bd8d70'),gold:mat('#c59a5b',.3)};
   const box=(w,h,d,m,x,y,z,parent=scene)=>{const o=new THREE.Mesh(new THREE.BoxGeometry(w,h,d),m);o.position.set(x,y,z);o.castShadow=true;o.receiveShadow=true;parent.add(o);return o;};
   const cyl=(r,h,m,x,y,z,parent=scene)=>{const o=new THREE.Mesh(new THREE.CylinderGeometry(r,r,h,18),m);o.position.set(x,y,z);o.castShadow=true;parent.add(o);return o;};
   const sphere=(r,m,x,y,z,parent=scene)=>{const o=new THREE.Mesh(new THREE.SphereGeometry(r,16,12),m);o.position.set(x,y,z);o.castShadow=true;parent.add(o);return o;};
+  const glowMat=new THREE.MeshStandardMaterial({color:'#ffd08a',emissive:'#ffad55',emissiveIntensity:2.1,roughness:.35});
+  const ledMat=new THREE.MeshStandardMaterial({color:'#e9b978',emissive:'#f6a94e',emissiveIntensity:1.7,roughness:.4});
+  const warmLamp=(x,y,z,intensity=2.1,distance=7)=>{const p=new THREE.PointLight('#ffbd72',intensity,distance,2);p.position.set(x,y,z);p.castShadow=false;scene.add(p);return p;};
+
   const label=(txt,x,z)=>{const c=document.createElement('canvas');c.width=512;c.height=128;const ctx=c.getContext('2d');ctx.fillStyle='#f5eee4';ctx.font='bold 46px Arial';ctx.textAlign='center';ctx.fillText(txt,256,78);const t=new THREE.CanvasTexture(c);t.colorSpace=THREE.SRGBColorSpace;const s=new THREE.Sprite(new THREE.SpriteMaterial({map:t,transparent:true}));s.position.set(x,2.9,z);s.scale.set(2.7,.68,1);scene.add(s);};
   const plant=(x,z,s=1)=>{cyl(.28*s,.38*s,mats.wood,x,.19*s,z);for(let i=0;i<6;i++){const l=new THREE.Mesh(new THREE.ConeGeometry(.14*s,.85*s,8),mat('#4e805a'));l.position.set(x+Math.sin(i*2.4)*.18*s,.72*s,z+Math.cos(i*2.4)*.18*s);l.rotation.z=Math.sin(i*2.4)*.3;scene.add(l);}};
   const chair=(x,z,rot=0)=>{const g=new THREE.Group();g.position.set(x,0,z);g.rotation.y=rot;scene.add(g);box(.62,.14,.62,mats.metal,0,.47,0,g);box(.62,.68,.13,mats.metal,0,.82,.25,g);cyl(.055,.42,mats.metal,0,.2,0,g);for(let i=0;i<4;i++){const a=i*Math.PI/2;box(.055,.045,.36,mats.metal,Math.sin(a)*.16,.05,Math.cos(a)*.16,g);}return g;};
@@ -36,9 +40,17 @@ export default function OfficeScene(){
   for(let x=-15;x<16;x+=2)for(let z=-10;z<11;z+=2)box(1.96,.016,1.96,mats.tile,x,-.005,z);
   // Glazed perimeter walls keep the floor plan readable from above.
   box(32,2.9,.18,mats.wall,0,1.45,-11);box(32,2.9,.18,mats.wall,0,1.45,11);box(.18,2.9,22,mats.wall,-16,1.45,0);box(.18,2.9,22,mats.wall,16,1.45,0);
+  // Warm architectural coves and discreet wall-wash lighting.
+  box(31.5,.055,.12,ledMat,0,2.72,-10.82);box(31.5,.055,.12,ledMat,0,2.72,10.82);
+  box(.12,.055,21.5,ledMat,-15.82,2.72,0);box(.12,.055,21.5,ledMat,15.82,2.72,0);
+  warmLamp(-11,2.25,-9.8,2.6,7);warmLamp(8,2.25,-9.8,2.4,7);warmLamp(13,2.1,-1.8,2.5,6);warmLamp(11.5,2.1,7.4,2.3,7);warmLamp(-10,2.2,2,1.8,6);
+
   const partition=(x,z,w,d,doorSide='south')=>{const h=2.55,t=.13;box(w,h,t,mats.wall,x,h/2,z-d/2);box(t,h,d,mats.wall,x-w/2,h/2,z);box(t,h,d,mats.wall,x+w/2,h/2,z);if(doorSide==='south'){box((w-1.15)/2,h,t,mats.wall,x-(w+1.15)/4,h/2,z+d/2);box((w-1.15)/2,h,t,mats.wall,x+(w+1.15)/4,h/2,z+d/2);}else box(w,h,t,mats.wall,x,h/2,z+d/2);};
   // Manager office: premium executive suite. Desk faces entrance; manager faces the door.
   partition(-11,-7,9,7);box(8.7,2.35,.045,mat('#a8c2cc',.22),-11,1.25,-3.47);label('MANAGER OFFICE',-11,-7);
+  // Plush executive rug anchors the director's suite without changing its layout.
+  box(7.8,.035,5.5,mat('#403329'),-11,.025,-7.1);
+  box(7.55,.018,5.25,mat('#66503b'),-11,.05,-7.1);
   // Oversized walnut executive desk with dark modesty panel and brass detailing.
   box(2.65,.18,1.35,mat('#49372b'),-11,.98,-7.05);box(2.55,.12,1.27,mat('#8b6748'),-11,1.13,-7.05);
   box(2.35,.72,.12,mats.metal,-11,.53,-6.48);box(.09,.78,1.12,mats.gold,-12.18,.55,-7.05);box(.09,.78,1.12,mats.gold,-9.82,.55,-7.05);
@@ -81,10 +93,14 @@ export default function OfficeScene(){
    return g;
   });
   // Coffee corner with an actual counter, espresso machine, mugs and shelves.
+  // Under-shelf amber LED and a warm pool of light over the coffee station.
+  box(4.15,.045,.09,glowMat,13,2.18,-2.23);warmLamp(13,2.45,-1.8,2.2,5);
   box(4.8,.16,.85,mats.oak,13,.88,-1.7);box(4.8,1.45,.12,mats.black,13,1.65,-2.2);box(4.3,.8,.04,mats.screen,13,1.7,-2.12);
   box(1.05,.85,.72,mats.metal,11.6,1.38,-1.65);box(.65,.3,.48,mats.black,11.6,1.95,-1.65);for(let x=12.5;x<=14.8;x+=.65){cyl(.12,.07,mats.cream,x,1.05,-1.55);cyl(.065,.07,mats.gold,x,1.13,-1.55);}
   for(let y=2.35;y<=2.95;y+=.3)box(4.1,.05,.2,mats.oak,13,y,-2.35);label('COFFEE BAR',13,-1.3);
   // Lounge moved to the far lower-right corner, with a clear aisle from the final employee desk.
+  // A darker textured rug and warm corner lighting create a relaxed lounge atmosphere.
+  box(7.4,.035,4.55,mat('#554238'),11.5,.025,7.65);warmLamp(11.5,2.2,7.2,2.0,6);
   box(7,.04,4.2,mat('#91877b'),11.5,.03,7.65);
   box(2.5,.38,.82,mats.fabric,10,.38,7.2);box(2.5,.72,.16,mats.fabric,10,.75,7.52);box(.16,.5,.84,mats.fabric,8.85,.52,7.2);box(.16,.5,.84,mats.fabric,11.15,.52,7.2);
   box(2.5,.38,.82,mats.red,13,.38,7.2);box(2.5,.72,.16,mats.red,13,.75,7.52);box(.16,.5,.84,mats.red,11.85,.52,7.2);box(.16,.5,.84,mats.red,14.15,.52,7.2);
@@ -99,6 +115,8 @@ export default function OfficeScene(){
   const tex=new THREE.CanvasTexture(c);tex.colorSpace=THREE.SRGBColorSpace;tex.anisotropy=renderer.capabilities.getMaxAnisotropy();
   const logo=new THREE.Mesh(new THREE.PlaneGeometry(5.35,1.4),new THREE.MeshBasicMaterial({map:tex,transparent:true,side:THREE.DoubleSide,depthWrite:false}));
   logo.position.set(-10.7,2.05,-10.68);scene.add(logo);
+  // Soft amber halo behind the NEXLOVA sign.
+  box(5.95,.035,.08,glowMat,-10.7,.94,-10.62);warmLamp(-10.7,2.45,-10.1,1.6,5);
   plant(-15,8,.75);plant(-1,8,.7);plant(15,-9,.75);plant(4,-9,.65);plant(-15,-9,.7);
   // Pick a staff member by clicking their 3D character.
   const raycaster=new THREE.Raycaster(),pointer=new THREE.Vector2();
