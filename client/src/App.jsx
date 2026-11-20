@@ -14,6 +14,7 @@ const initialAgents = [
 export default function App(){
  const [data,setData]=useState({agents:initialAgents,tasks:[],messages:[],meetings:[]});
  const [booting,setBooting]=useState(true),[authRequired,setAuthRequired]=useState(false),[loginPassword,setLoginPassword]=useState(''),[loginError,setLoginError]=useState(''),[connectionError,setConnectionError]=useState('');
+ const [socialStatus,setSocialStatus]=useState(null);
  const [tab,setTab]=useState('Overview'),[agent,setAgent]=useState('marketing'),[title,setTitle]=useState(''),[brief,setBrief]=useState(''),[chat,setChat]=useState(''),[toast,setToast]=useState(''),[quickTask,setQuickTask]=useState(false),[officeFullscreen,setOfficeFullscreen]=useState(false);
  const chosen=data.agents.find(a=>a.id===agent)||data.agents[0];
  React.useEffect(()=>{let active=true;(async()=>{try{const health=await api('/health');if(import.meta.env.PROD&&!health.storage?.persistent)throw new Error('Supabase PostgreSQL is not connected to the ISystem backend yet.');const config=await api('/auth/config');if(!active)return;setAuthRequired(Boolean(config.required));if(config.required&&!localStorage.getItem('office_owner_token'))return;const state=await api('/state');if(active){setData(state);setConnectionError('');}}catch(err){if(active){if(err.message==='Authentication required'){localStorage.removeItem('office_owner_token');setAuthRequired(true);}else setConnectionError(err.message);}}finally{if(active)setBooting(false);}})();return()=>{active=false;}},[]);
