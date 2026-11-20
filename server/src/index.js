@@ -97,20 +97,31 @@ app.post('/api/chat',async(req,res)=>{
  const agent=getState().agents.find(a=>a.id===agentId);
  if(!agent)return res.status(404).json({error:'Agent not found'});
  const history=getState().messages.filter(m=>m.agentId===agentId&&(!meetingId||m.meetingId===meetingId)).slice(-12);
- const approvalToPublish=/^(حلو|تمام|ممتاز|جميل|اوكي|أوكي|انشره|نزله|انشر|يلا)\\s*(نزله|انشره|انشر|جدوله|جدول|يلا)?[.!؟]*$/i.test(message.trim());
- const publishIntent=agent.id==='marketing'&&(/\\b(publish|schedule|post now)\\b|انشر|نز[ّ]?ل|جدول|انشره|نزله/i.test(message));
- const previousAssistant=[...history].reverse().find(m=>m.sender!=='owner')?.content;
+ const cleanMessage=String(message).trim();
+ const approvalToPublish=/^(حلو|تمام|ممتاز|جميل|اوكي|أوكي|يلا|انشره|نزله|نزّله|انشر|انشره دلوقتي)(?:\\s*(نزله|نزّله|انشره|انشر|جدوله|جدول|يلا))?[.!؟]*$/i.test(cleanMessage);
+ const publishIntent=agent.id==='marketing'&&(/\\b(publish|schedule|post now)\\b|انشر|نز[ّ]?ل|تنزيل|نزل|جدول|انشره|فيسبوك|facebook|instagram/i.test(cleanMessage));
+ const previousAssistant=[...history].reverse().find(m=>m.sender!=='owner'&&!/لا أستطيع|لا استطيع|لا يمكنني|مش قادر|لا يمكن نشر|لا أملك صلاحية|لا يوجد لدي اتصال|لا أستطيع الوصول/i.test(m.content))?.content;
  let reply;
  try {
-   reply=approvalToPublish&&previousAssistant?previousAssistant:await generateText({system:agent.systemPrompt,provider:agent.ai?.provider,model:agent.ai?.model,user:[...history.map(m=>m.sender+': '+m.content),'Owner: '+message].join('\\n')});
+   if(publishIntent) {
+     const postDraft=approvalToPublish&&previousAssistant?previousAssistant:await generateText({
+       system:agent.systemPrompt+'\\nYou are authorized to create and submit social posts using the connected Buffer publishing integration when the owner explicitly requests publishing. Do not refuse on the basis that you cannot publish. Return only the final publish-ready post copy, with a concise caption and relevant hashtags. Do not claim it is published; the server will publish it after this response.',
+       provider:agent.ai?.provider,model:agent.ai?.model,
+       user:[...history.map(m=>m.sender+': '+m.content),'Owner publishing instruction: '+message,'Create the final publish-ready post now.'].join('\\n')
+     });
+     reply=String(postDraft||'').trim();
+   } else {
+     reply=await generateText({system:agent.systemPrompt,provider:agent.ai?.provider,model:agent.ai?.model,user:[...history.map(m=>m.sender+': '+m.content),'Owner: '+message].join('\\n')});
+   }
  } catch(e) { reply='AI provider error: '+e.message; }
  if(!reply)return res.status(503).json({error:'OpenAI API key is not configured. Add OPENAI_API_KEY in Vercel Environment Variables.'});
  let publication=[];
  if(publishIntent){
    const postText=String(reply).replace(/^\\s*#+\\s*/gm,'').replace(/\\*\\*(.*?)\\*\\*/g,'$1').trim();
-   for(const service of ['facebook','instagram']){
+   const services=/فيسبوك|facebook/i.test(cleanMessage)&&!/انستجرام|instagram/i.test(cleanMessage)?['facebook']:/انستجرام|instagram/i.test(cleanMessage)&&!/فيسبوك|facebook/i.test(cleanMessage)?['instagram']:['facebook','instagram'];
+   for(const service of services){
      try{
-       const result=await publishBufferPost({service,text:postText,assetUrl,mode:/دلوقتي|حالاً|حالا|now/i.test(message)?'shareNow':'addToQueue'});
+       const result=await publishBufferPost({service,text:postText,assetUrl,mode:/دلوقتي|حالاً|حالا|now/i.test(cleanMessage)?'shareNow':'addToQueue'});
        publication.push({service,ok:true,post:result});
      }catch(error){publication.push({service,ok:false,error:error.message});}
    }
