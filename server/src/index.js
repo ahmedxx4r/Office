@@ -11,7 +11,7 @@ import { generateText, getAiMetrics } from './ai.js';
 import { authRequired, issueToken, passwordMatches, requireOwner, verifyToken } from './auth.js';
 import { notifyTaskComplete, graphRequest } from './notifications.js';
 import { registerInstagramRoutes } from './integrations/instagram.js';
-import { registerBufferRoutes } from './integrations/buffer.js';
+import { registerBufferRoutes, publishBufferPost } from './integrations/buffer.js';
 
 const app = express();
 const server = createServer(app);
@@ -91,7 +91,35 @@ app.delete('/api/tasks/:id',(req,res)=>{let removed=false;update(s=>{const n=s.t
 app.get('/api/meetings',(_req,res)=>res.json(getState().meetings||[]));
 app.post('/api/meetings',(req,res)=>{const {title='Team Meeting',agentIds=[]}=req.body||{};if(!Array.isArray(agentIds)||agentIds.some(id=>!getState().agents.some(a=>a.id===id)))return res.status(400).json({error:'Invalid agent IDs'});const meeting={id:uuid(),title,agentIds,createdAt:new Date().toISOString(),status:'active'};update(s=>{s.meetings.push(meeting);for(const id of agentIds){const a=s.agents.find(x=>x.id===id);if(a)a.status='meeting';}});emit('meeting:started',{meetingId:meeting.id});res.status(201).json(meeting);});
 app.post('/api/meetings/:id/end',(req,res)=>{let meeting;update(s=>{meeting=s.meetings.find(m=>m.id===req.params.id);if(meeting){meeting.status='ended';for(const id of meeting.agentIds){const a=s.agents.find(x=>x.id===id);if(a&&a.status==='meeting')a.status='idle';}}});if(!meeting)return res.status(404).json({error:'Meeting not found'});emit('meeting:ended',{meetingId:meeting.id});res.json(meeting);});
-app.post('/api/chat',async(req,res)=>{const {agentId,message,meetingId}=req.body||{};if(!message?.trim())return res.status(400).json({error:'Message is required'});const agent=getState().agents.find(a=>a.id===agentId);if(!agent)return res.status(404).json({error:'Agent not found'});const history=getState().messages.filter(m=>m.agentId===agentId&&(!meetingId||m.meetingId===meetingId)).slice(-12);let reply;try{reply=await generateText({system:agent.systemPrompt,provider:agent.ai?.provider,model:agent.ai?.model,user:[...history.map(m=>m.sender+': '+m.content),'Owner: '+message].join('\n')});}catch(e){reply='AI provider error: '+e.message;}if(!reply)return res.status(503).json({error:'OpenAI API key is not configured. Add OPENAI_API_KEY in Vercel Environment Variables.'});const pair=[{id:uuid(),agentId,meetingId:meetingId||null,sender:'owner',content:message,at:new Date().toISOString()},{id:uuid(),agentId,meetingId:meetingId||null,sender:agent.name,content:reply,at:new Date().toISOString()}];update(s=>s.messages.push(...pair));emit('chat:message',{agentId});res.json({messages:pair});});
+app.post('/api/chat',async(req,res)=>{
+ const {agentId,message,meetingId,assetUrl}=req.body||{};
+ if(!message?.trim())return res.status(400).json({error:'Message is required'});
+ const agent=getState().agents.find(a=>a.id===agentId);
+ if(!agent)return res.status(404).json({error:'Agent not found'});
+ const history=getState().messages.filter(m=>m.agentId===agentId&&(!meetingId||m.meetingId===meetingId)).slice(-12);
+ const approvalToPublish=/^(حلو|تمام|ممتاز|جميل|اوكي|أوكي|انشره|نزله|انشر|يلا)\\s*(نزله|انشره|انشر|جدوله|جدول|يلا)?[.!؟]*$/i.test(message.trim());
+ const publishIntent=agent.id==='marketing'&&(/\\b(publish|schedule|post now)\\b|انشر|نز[ّ]?ل|جدول|انشره|نزله/i.test(message));
+ const previousAssistant=[...history].reverse().find(m=>m.sender!=='owner')?.content;
+ let reply;
+ try {
+   reply=approvalToPublish&&previousAssistant?previousAssistant:await generateText({system:agent.systemPrompt,provider:agent.ai?.provider,model:agent.ai?.model,user:[...history.map(m=>m.sender+': '+m.content),'Owner: '+message].join('\\n')});
+ } catch(e) { reply='AI provider error: '+e.message; }
+ if(!reply)return res.status(503).json({error:'OpenAI API key is not configured. Add OPENAI_API_KEY in Vercel Environment Variables.'});
+ let publication=[];
+ if(publishIntent){
+   const postText=String(reply).replace(/^\\s*#+\\s*/gm,'').replace(/\\*\\*(.*?)\\*\\*/g,'$1').trim();
+   for(const service of ['facebook','instagram']){
+     try{
+       const result=await publishBufferPost({service,text:postText,assetUrl,mode:/دلوقتي|حالاً|حالا|now/i.test(message)?'shareNow':'addToQueue'});
+       publication.push({service,ok:true,post:result});
+     }catch(error){publication.push({service,ok:false,error:error.message});}
+   }
+   const done=publication.filter(item=>item.ok),failed=publication.filter(item=>!item.ok);
+   reply+='\\n\\n**نتيجة النشر عبر Buffer:**\\n'+done.map(item=>'✅ '+item.service+' — '+(item.post.status||'تمت الإضافة')+(item.post.dueAt?' · '+item.post.dueAt:'')).join('\\n')+(failed.length?'\\n'+failed.map(item=>'⚠️ '+item.service+' — '+item.error).join('\\n'):'');
+ }
+ const pair=[{id:uuid(),agentId,meetingId:meetingId||null,sender:'owner',content:message,at:new Date().toISOString()},{id:uuid(),agentId,meetingId:meetingId||null,sender:agent.name,content:reply,at:new Date().toISOString()}];
+ update(s=>s.messages.push(...pair));emit('chat:message',{agentId,publication});res.json({messages:pair,publication});
+});
 
 app.get('/api/push/public-key',(_req,res)=>res.json({publicKey:process.env.VAPID_PUBLIC_KEY||null}));
 app.post('/api/push/subscribe',(req,res)=>{const sub=req.body;if(!sub?.endpoint||!sub?.keys?.p256dh||!sub?.keys?.auth)return res.status(400).json({error:'Invalid push subscription'});update(s=>{s.pushSubscriptions||=[];if(!s.pushSubscriptions.some(x=>x.endpoint===sub.endpoint))s.pushSubscriptions.push(sub);});res.status(201).json({ok:true});});
