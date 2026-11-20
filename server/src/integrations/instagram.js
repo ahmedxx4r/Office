@@ -25,7 +25,7 @@ function decrypt(value) {
   return Buffer.concat([decipher.update(Buffer.from(body, 'base64url')), decipher.final()]).toString('utf8');
 }
 const hash = value => crypto.createHash('sha256').update(value).digest('hex');
-const graph = path => `https://graph.facebook.com/${GRAPH_VERSION}/${path.replace(/^\\//, '')}`;
+const graph = path => `https://graph.facebook.com/${GRAPH_VERSION}/${path.replace(/^\//, '')}`;
 const html = (res, status, title, message) => res.status(status).type('html').send(`<!doctype html><html><meta charset="utf-8"><meta name="viewport" content="width=device-width"><title>${title}</title><body style="font:16px system-ui;max-width:640px;margin:12vh auto;padding:24px;color:#18202a"><h2>${title}</h2><p>${String(message).replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]))}</p><p>You can close this tab and return to ISystem.</p></body></html>`);
 
 async function exchangeCode(code) {
