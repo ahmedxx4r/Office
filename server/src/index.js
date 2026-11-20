@@ -11,7 +11,8 @@ import { generateText, getAiMetrics } from './ai.js';
 import { authRequired, issueToken, passwordMatches, requireOwner, verifyToken } from './auth.js';
 import { notifyTaskComplete, graphRequest } from './notifications.js';
 import { registerInstagramRoutes } from './integrations/instagram.js';
-import { registerBufferRoutes, publishBufferPost } from './integrations/buffer.js';
+import { registerBufferRoutes } from './integrations/buffer.js';
+import { registerPostRoutes, publishFromChat } from './posts.js';
 
 const app = express();
 const server = createServer(app);
@@ -27,6 +28,7 @@ app.get('/api/health', (_req,res)=>res.json({ok:true,mode:process.env.OPENAI_API
 app.get('/api/auth/config', (_req,res)=>res.json({required:authRequired()}));
 registerInstagramRoutes(app);
 registerBufferRoutes(app);
+registerPostRoutes(app, { emit });
 app.post('/api/auth/login',(req,res)=>{ if(!authRequired()) return res.json({token:null,required:false}); if(!passwordMatches(req.body?.password||'')) return res.status(401).json({error:'Invalid owner password'}); res.json({token:issueToken(),required:true}); });
 app.get('/api/state',(_req,res)=>res.json(getState()));
 app.get('/api/metrics/ai',(_req,res)=>res.json(getAiMetrics()));
@@ -98,35 +100,29 @@ app.post('/api/chat',async(req,res)=>{
  if(!agent)return res.status(404).json({error:'Agent not found'});
  const history=getState().messages.filter(m=>m.agentId===agentId&&(!meetingId||m.meetingId===meetingId)).slice(-12);
  const cleanMessage=String(message).trim();
- const approvalToPublish=/^(حلو|تمام|ممتاز|جميل|اوكي|أوكي|يلا|انشره|نزله|نزّله|انشر|انشره دلوقتي)(?:\\s*(نزله|نزّله|انشره|انشر|جدوله|جدول|يلا))?[.!؟]*$/i.test(cleanMessage);
- const publishIntent=agent.id==='marketing'&&(/\\b(publish|schedule|post now)\\b|انشر|نز[ّ]?ل|تنزيل|نزل|جدول|انشره|فيسبوك|facebook|instagram/i.test(cleanMessage));
+ const approvalToPublish=/^(حلو|تمام|ممتاز|جميل|اوكي|أوكي|يلا|انشره|نزله|نزّله|انشر|انشره دلوقتي)(?:\s*(نزله|نزّله|انشره|انشر|جدوله|جدول|يلا))?[.!؟]*$/i.test(cleanMessage);
+ const publishIntent=agent.id==='marketing'&&(/\b(publish|schedule|post now)\b|انشر|نز[ّ]?ل|تنزيل|نزل|جدول|انشره|فيسبوك|facebook|instagram/i.test(cleanMessage));
  const previousAssistant=[...history].reverse().find(m=>m.sender!=='owner'&&!/لا أستطيع|لا استطيع|لا يمكنني|مش قادر|لا يمكن نشر|لا أملك صلاحية|لا يوجد لدي اتصال|لا أستطيع الوصول/i.test(m.content))?.content;
  let reply;
  try {
    if(publishIntent) {
      const postDraft=approvalToPublish&&previousAssistant?previousAssistant:await generateText({
-       system:agent.systemPrompt+'\\nYou are authorized to create and submit social posts using the connected Buffer publishing integration when the owner explicitly requests publishing. Do not refuse on the basis that you cannot publish. Return only the final publish-ready post copy, with a concise caption and relevant hashtags. Do not claim it is published; the server will publish it after this response.',
+       system:agent.systemPrompt+'\nYou are authorized to create and submit social posts using the connected Buffer publishing integration when the owner explicitly requests publishing. Do not refuse on the basis that you cannot publish. Return only the final publish-ready post copy, with a concise caption and relevant hashtags. Do not claim it is published; the server will publish it after this response.',
        provider:agent.ai?.provider,model:agent.ai?.model,
-       user:[...history.map(m=>m.sender+': '+m.content),'Owner publishing instruction: '+message,'Create the final publish-ready post now.'].join('\\n')
+       user:[...history.map(m=>m.sender+': '+m.content),'Owner publishing instruction: '+message,'Create the final publish-ready post now.'].join('\n')
      });
      reply=String(postDraft||'').trim();
    } else {
-     reply=await generateText({system:agent.systemPrompt,provider:agent.ai?.provider,model:agent.ai?.model,user:[...history.map(m=>m.sender+': '+m.content),'Owner: '+message].join('\\n')});
+     reply=await generateText({system:agent.systemPrompt,provider:agent.ai?.provider,model:agent.ai?.model,user:[...history.map(m=>m.sender+': '+m.content),'Owner: '+message].join('\n')});
    }
  } catch(e) { reply='AI provider error: '+e.message; }
  if(!reply)return res.status(503).json({error:'OpenAI API key is not configured. Add OPENAI_API_KEY in Vercel Environment Variables.'});
  let publication=[];
  if(publishIntent){
-   const postText=String(reply).replace(/^\\s*#+\\s*/gm,'').replace(/\\*\\*(.*?)\\*\\*/g,'$1').trim();
-   const services=/فيسبوك|facebook/i.test(cleanMessage)&&!/انستجرام|instagram/i.test(cleanMessage)?['facebook']:/انستجرام|instagram/i.test(cleanMessage)&&!/فيسبوك|facebook/i.test(cleanMessage)?['instagram']:['facebook','instagram'];
-   for(const service of services){
-     try{
-       const result=await publishBufferPost({service,text:postText,assetUrl,mode:/دلوقتي|حالاً|حالا|now/i.test(cleanMessage)?'shareNow':'addToQueue'});
-       publication.push({service,ok:true,post:result});
-     }catch(error){publication.push({service,ok:false,error:error.message});}
-   }
+   const postText=String(reply).replace(/^\s*#+\s*/gm,'').replace(/\*\*(.*?)\*\*/g,'$1').trim();
+   publication=await publishFromChat({text:postText,message:cleanMessage,assetUrl});
    const done=publication.filter(item=>item.ok),failed=publication.filter(item=>!item.ok);
-   reply+='\\n\\n**نتيجة النشر عبر Buffer:**\\n'+done.map(item=>'✅ '+item.service+' — '+(item.post.status||'تمت الإضافة')+(item.post.dueAt?' · '+item.post.dueAt:'')).join('\\n')+(failed.length?'\\n'+failed.map(item=>'⚠️ '+item.service+' — '+item.error).join('\\n'):'');
+   reply+='\n\n**نتيجة النشر عبر Buffer:**\n'+done.map(item=>'✅ '+item.service+' — '+(item.post.status||'تمت الإضافة')+(item.post.dueAt?' · '+item.post.dueAt:'')).join('\n')+(failed.length?'\n'+failed.map(item=>'⚠️ '+item.service+' — '+item.error).join('\n'):'');
  }
  const pair=[{id:uuid(),agentId,meetingId:meetingId||null,sender:'owner',content:message,at:new Date().toISOString()},{id:uuid(),agentId,meetingId:meetingId||null,sender:agent.name,content:reply,at:new Date().toISOString()}];
  update(s=>s.messages.push(...pair));emit('chat:message',{agentId,publication});res.json({messages:pair,publication});
