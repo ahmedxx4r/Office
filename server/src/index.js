@@ -10,6 +10,7 @@ import { createAgent } from './agents.js';
 import { generateText, getAiMetrics } from './ai.js';
 import { authRequired, issueToken, passwordMatches, requireOwner, verifyToken } from './auth.js';
 import { notifyTaskComplete, graphRequest } from './notifications.js';
+import { registerInstagramRoutes } from './integrations/instagram.js';
 
 const app = express();
 const server = createServer(app);
@@ -17,12 +18,13 @@ const allowedOrigins = process.env.VERCEL === '1' ? ['*'] : (process.env.CLIENT_
 const corsOptions = { origin: (origin, cb) => !origin || allowedOrigins.includes('*') || allowedOrigins.includes(origin) ? cb(null, true) : cb(new Error('Origin not allowed')), credentials: true };
 app.use(cors(corsOptions));
 app.use(express.json({ limit: '1mb' }));
-app.use('/api', (req,res,next) => ['/health','/auth/config','/auth/login'].includes(req.path) ? next() : requireOwner(req,res,next));
+app.use('/api', (req,res,next) => ['/health','/auth/config','/auth/login','/integrations/instagram/callback'].includes(req.path) ? next() : requireOwner(req,res,next));
 
 const io = new Server(server, { cors: { origin: allowedOrigins, methods: ['GET','POST'], credentials: true } });
 const emit = (event, payload={}) => { const entry={ id:uuid(), type:event, payload, at:new Date().toISOString() }; update(s=>s.events.unshift(entry)); io.emit('office:event',entry); io.emit('office:state',getState()); };
 app.get('/api/health', (_req,res)=>res.json({ok:true,mode:process.env.OPENAI_API_KEY?'ai':'not_configured',authRequired:authRequired(),storage:getStoreStatus()}));
 app.get('/api/auth/config', (_req,res)=>res.json({required:authRequired()}));
+registerInstagramRoutes(app);
 app.post('/api/auth/login',(req,res)=>{ if(!authRequired()) return res.json({token:null,required:false}); if(!passwordMatches(req.body?.password||'')) return res.status(401).json({error:'Invalid owner password'}); res.json({token:issueToken(),required:true}); });
 app.get('/api/state',(_req,res)=>res.json(getState()));
 app.get('/api/metrics/ai',(_req,res)=>res.json(getAiMetrics()));
