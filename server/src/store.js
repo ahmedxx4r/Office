@@ -74,3 +74,8 @@ export function getStoreStatus() { return { persistent: Boolean(pool), provider:
 export function save() { persist(); }
 export function update(mutator) { mutator(state); persist(); return state; }
 export async function closeStore() { await persistChain; if (pool) await pool.end(); }
+
+export async function queryDb(sql, params = []) {
+  if (!pool) throw new Error('Persistent PostgreSQL storage is not available.');
+  return pool.query(sql, params);
+}
