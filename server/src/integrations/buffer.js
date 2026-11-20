@@ -72,7 +72,7 @@ export async function publishBufferPost({ service, text, assetUrl, mode = 'addTo
       ... on MutationError { message }
     }
   }`;
-  const result = await bufferQueryWithVariables(mutation, input);
+  const result = await bufferQueryWithVariables(mutation, { input });
   const created = result.createPost;
   if (created?.message) throw new Error(created.message);
   if (!created?.post?.id) throw new Error('Buffer did not confirm that the post was created.');
