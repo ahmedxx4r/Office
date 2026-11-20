@@ -47,7 +47,7 @@ export async function initStore() {
   let profilesUpdated = false;
   state.agents = (state.agents || []).map(agent => {
     const seed = seedById.get(agent.id);
-    if (seed && !agent.ai) { profilesUpdated = true; return { ...seed, ...agent, ai: seed.ai }; }
+    if (seed && (!agent.ai || (agent.id === 'marketing' && agent.systemPrompt !== seed.systemPrompt))) { profilesUpdated = true; return { ...seed, ...agent, ai: seed.ai || agent.ai }; }
     return agent;
   });
   if (profilesUpdated) persist();
