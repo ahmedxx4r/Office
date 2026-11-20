@@ -295,3 +295,5 @@ body{
 .auth-card input:focus{border-color:#14c3a2;box-shadow:0 0 0 3px #14c3a222}
 .auth-card .primary{border:0;border-radius:10px;padding:13px 16px;background:#e0243a;color:#fff;font-weight:700}
 .auth-error{color:#ff8794;font-size:12px}
+
+.integration-card{display:flex;flex-wrap:wrap;align-items:center;justify-content:space-between;gap:14px;padding:18px;border:1px solid var(--line);border-radius:12px;background:#0d121c}.integration-card>div{display:grid;gap:6px}.integration-card b{font-size:13px}.integration-card small{display:block;color:var(--muted);font-size:11px;overflow-wrap:anywhere}.integration-card>small{flex-basis:100%}
