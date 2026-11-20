@@ -1,22 +1,36 @@
 const endpoint = 'https://api.buffer.com';
 
-async function bufferQuery(query) {
+async function bufferRequest(query, variables) {
   const key = process.env.BUFFER_ACCESS_TOKEN || process.env.BUFFER_API_KEY;
-  if (!key) throw new Error('Buffer API key is missing. Add BUFFER_ACCESS_TOKEN in Vercel.');
-  const response = await fetch(endpoint, {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json', Authorization: 'Bearer ' + key },
-    body: JSON.stringify({ query })
-  });
+  if (!key) {
+    const error = new Error('Buffer API key is missing. Add BUFFER_ACCESS_TOKEN in Vercel.');
+    error.retryable = false;
+    throw error;
+  }
+  let response;
+  try {
+    response = await fetch(endpoint, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json', Authorization: 'Bearer ' + key },
+      body: JSON.stringify(variables ? { query, variables } : { query })
+    });
+  } catch (networkError) {
+    const error = new Error('Buffer network error: ' + networkError.message);
+    error.retryable = true;
+    throw error;
+  }
   const payload = await response.json().catch(() => ({}));
   if (!response.ok || payload.errors?.length) {
     const message = payload.errors?.map(x => x.message).filter(Boolean).join('; ') || 'Buffer API request failed (' + response.status + ').';
     const error = new Error(message);
     error.status = response.status;
+    error.retryable = response.status === 429 || response.status >= 500;
     throw error;
   }
   return payload.data || {};
 }
+
+const bufferQuery = query => bufferRequest(query);
 
 export function registerBufferRoutes(app) {
   app.get('/api/integrations/buffer/status', async (_req, res) => {
@@ -45,7 +59,7 @@ export function registerBufferRoutes(app) {
 }
 
 
-export async function publishBufferPost({ service, text, assetUrl, mode = 'addToQueue' }) {
+export async function publishBufferPost({ service, text, assetUrl, mode = 'addToQueue', dueAt }) {
   const account = await bufferQuery(`query ISystemBufferPublishTargets {
     account { organizations { id name } }
   }`);
@@ -57,11 +71,13 @@ export async function publishBufferPost({ service, text, assetUrl, mode = 'addTo
   const channel = (channelData.channels || []).find(item => item.service === service && !item.isDisconnected);
   if (!channel) throw new Error('No active ' + service + ' channel is connected in Buffer.');
   if (service === 'instagram' && !assetUrl) throw new Error('Instagram requires a public image or video URL. Attach media before publishing.');
+  if (mode === 'customScheduled' && !dueAt) throw new Error('A scheduled post needs a dueAt time.');
   const input = {
     text: String(text || '').trim(),
     channelId: channel.id,
     schedulingType: 'automatic',
     mode,
+    ...(mode === 'customScheduled' ? { dueAt: new Date(dueAt).toISOString() } : {}),
     ...(assetUrl ? { assets: [{ image: { url: assetUrl, metadata: { altText: 'NEXLOVA social media post' } } }] } : {}),
     metadata: service === 'facebook' ? { facebook: { type: 'post' } } : { instagram: { type: 'post', shouldShareToFeed: true } }
   };
@@ -72,25 +88,24 @@ export async function publishBufferPost({ service, text, assetUrl, mode = 'addTo
       ... on MutationError { message }
     }
   }`;
-  const result = await bufferQueryWithVariables(mutation, { input });
+  const result = await bufferRequest(mutation, { input });
   const created = result.createPost;
-  if (created?.message) throw new Error(created.message);
-  if (!created?.post?.id) throw new Error('Buffer did not confirm that the post was created.');
-  return { service, channel: channel.name, ...created.post };
+  if (created?.message) { const error = new Error(created.message); error.retryable = false; throw error; }
+  if (!created?.post?.id) { const error = new Error('Buffer did not confirm that the post was created.'); error.retryable = false; throw error; }
+  return { service, channel: channel.name, channelId: channel.id, ...created.post };
 }
 
-async function bufferQueryWithVariables(query, variables) {
-  const key = process.env.BUFFER_ACCESS_TOKEN || process.env.BUFFER_API_KEY;
-  if (!key) throw new Error('Buffer API key is missing. Add BUFFER_ACCESS_TOKEN in Vercel.');
-  const response = await fetch(endpoint, {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json', Authorization: 'Bearer ' + key },
-    body: JSON.stringify({ query, variables })
-  });
-  const payload = await response.json().catch(() => ({}));
-  if (!response.ok || payload.errors?.length) {
-    const message = payload.errors?.map(x => x.message).filter(Boolean).join('; ') || 'Buffer API request failed (' + response.status + ').';
-    const error = new Error(message); error.status = response.status; throw error;
-  }
-  return payload.data || {};
+export async function deleteBufferPost(id) {
+  const result = await bufferRequest(`mutation ISystemDeletePost($input: DeletePostInput!) {
+    deletePost(input: $input) { __typename ... on MutationError { message } }
+  }`, { input: { id } });
+  if (result.deletePost?.message) { const error = new Error(result.deletePost.message); error.retryable = false; throw error; }
+  return { ok: true };
+}
+
+export async function getBufferPost(id) {
+  const data = await bufferQuery(`query ISystemGetPost {
+    post(input: { id: ${JSON.stringify(String(id))} }) { id status dueAt externalLink }
+  }`);
+  return data.post || null;
 }
