@@ -98,7 +98,7 @@ app.post('/api/chat',async(req,res)=>{
  if(!message?.trim())return res.status(400).json({error:'Message is required'});
  const agent=getState().agents.find(a=>a.id===agentId);
  if(!agent)return res.status(404).json({error:'Agent not found'});
- const history=getState().messages.filter(m=>m.agentId===agentId&&(!meetingId||m.meetingId===meetingId)).slice(-12).map(m=>({...m,content:m.sender==='owner'?m.content:String(m.content||'').replace(/^\\s*(?:عمر|Omar)\\s*[:：-]\\s*/i,'')}));
+ const history=getState().messages.filter(m=>m.agentId===agentId&&(!meetingId||m.meetingId===meetingId)).slice(-12).map(m=>({...m,content:m.sender==='owner'?m.content:String(m.content||'').replace(/^\s*(?:عمر|Omar)\s*[:：-]\s*/i,'')}));
  const cleanMessage=String(message).trim();
  const approvalToPublish=/^(حلو|تمام|ممتاز|جميل|اوكي|أوكي|يلا|انشره|نزله|نزّله|انشر|انشره دلوقتي)(?:\s*(نزله|نزّله|انشره|انشر|جدوله|جدول|يلا))?[.!؟]*$/i.test(cleanMessage);
  const publishIntent=agent.id==='marketing'&&(/\b(publish|schedule|post now)\b|انشر|نز[ّ]?ل|تنزيل|نزل|جدول|انشره|فيسبوك|facebook|instagram/i.test(cleanMessage));
@@ -117,7 +117,7 @@ app.post('/api/chat',async(req,res)=>{
    }
  } catch(e) { reply='AI provider error: '+e.message; }
  if(!reply)return res.status(503).json({error:'OpenAI API key is not configured. Add OPENAI_API_KEY in Vercel Environment Variables.'});
- reply=String(reply).replace(/^\\s*(?:عمر|Omar)\\s*[:：-]\\s*/i,'').trim();
+ reply=String(reply).replace(/^\s*(?:عمر|Omar)\s*[:：-]\s*/i,'').trim();
  let publication=[];
  if(publishIntent){
    const postText=String(reply).replace(/^\s*#+\s*/gm,'').replace(/\*\*(.*?)\*\*/g,'$1').trim();
