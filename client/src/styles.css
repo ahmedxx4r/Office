@@ -297,3 +297,8 @@ body{
 .auth-error{color:#ff8794;font-size:12px}
 
 .integration-card{display:flex;flex-wrap:wrap;align-items:center;justify-content:space-between;gap:14px;padding:18px;border:1px solid var(--line);border-radius:12px;background:#0d121c}.integration-card>div{display:grid;gap:6px}.integration-card b{font-size:13px}.integration-card small{display:block;color:var(--muted);font-size:11px;overflow-wrap:anywhere}.integration-card>small{flex-basis:100%}
+
+.chat-compose{display:flex;flex-direction:column;gap:8px}
+.chat-compose .chat-media-url{width:100%;font-size:11px;color:#cbd3da}
+.chat-send-row{display:flex;gap:8px;align-items:center}
+.chat-send-row input{min-width:0;flex:1}
