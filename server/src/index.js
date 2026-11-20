@@ -11,6 +11,7 @@ import { generateText, getAiMetrics } from './ai.js';
 import { authRequired, issueToken, passwordMatches, requireOwner, verifyToken } from './auth.js';
 import { notifyTaskComplete, graphRequest } from './notifications.js';
 import { registerInstagramRoutes } from './integrations/instagram.js';
+import { registerBufferRoutes } from './integrations/buffer.js';
 
 const app = express();
 const server = createServer(app);
@@ -25,6 +26,7 @@ const emit = (event, payload={}) => { const entry={ id:uuid(), type:event, paylo
 app.get('/api/health', (_req,res)=>res.json({ok:true,mode:process.env.OPENAI_API_KEY?'ai':'not_configured',authRequired:authRequired(),storage:getStoreStatus()}));
 app.get('/api/auth/config', (_req,res)=>res.json({required:authRequired()}));
 registerInstagramRoutes(app);
+registerBufferRoutes(app);
 app.post('/api/auth/login',(req,res)=>{ if(!authRequired()) return res.json({token:null,required:false}); if(!passwordMatches(req.body?.password||'')) return res.status(401).json({error:'Invalid owner password'}); res.json({token:issueToken(),required:true}); });
 app.get('/api/state',(_req,res)=>res.json(getState()));
 app.get('/api/metrics/ai',(_req,res)=>res.json(getAiMetrics()));
