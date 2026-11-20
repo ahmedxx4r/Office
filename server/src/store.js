@@ -30,7 +30,7 @@ export async function initStore() {
     try {
       const { Pool } = await import('pg');
       pool = new Pool({ connectionString: process.env.DATABASE_URL, ssl: process.env.DATABASE_SSL === 'true' ? { rejectUnauthorized: false } : undefined, max: 10 });
-      await pool.query(`CREATE TABLE IF NOT EXISTS office_state (id integer PRIMARY KEY CHECK (id = 1), payload jsonb NOT NULL, updated_at timestamptz NOT NULL DEFAULT NOW())`);
+      // The office_state table is provisioned separately; the runtime role intentionally has no CREATE privilege on public.
       const result = await pool.query('SELECT payload FROM office_state WHERE id = 1');
       if (result.rows[0]?.payload) state = { ...structuredClone(initial), ...result.rows[0].payload };
       else await pool.query('INSERT INTO office_state (id, payload) VALUES (1, $1::jsonb)', [JSON.stringify(state)]);
