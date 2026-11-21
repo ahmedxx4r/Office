@@ -14,11 +14,9 @@
     "dotenv": "^16.4.7",
     "express": "^4.21.2",
     "ioredis": "^5.4.2",
-    "jsonwebtoken": "^9.0.2",
-    "openai": "^4.77.0",
     "pg": "^8.13.1",
     "socket.io": "^4.8.1",
-    "web-push": "^3.6.7",
-    "uuid": "^11.0.3"
+    "uuid": "^11.0.3",
+    "web-push": "^3.6.7"
   }
 }

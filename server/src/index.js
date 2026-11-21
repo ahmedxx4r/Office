@@ -144,7 +144,7 @@ const port=Number(process.env.PORT||4000);
 await initStore();
 if(process.env.VERCEL!=='1') {
   await initTaskQueue(processTask);
-  server.listen(port,()=>console.log('Virtual AI Office API listening on '+port));
+  server.listen(port,()=>console.log('ISystem API listening on '+port));
   const shutdown=async()=>{server.close();await closeQueue();await closeStore();process.exit(0);};
   process.on('SIGINT',shutdown);process.on('SIGTERM',shutdown);
 }

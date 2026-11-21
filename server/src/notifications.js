@@ -61,7 +61,7 @@ export async function notifyTaskComplete(task, subscriptions=[]) {
     try {
       const webpush = await import('web-push');
       webpush.default.setVapidDetails(process.env.VAPID_SUBJECT || 'mailto:admin@example.com', process.env.VAPID_PUBLIC_KEY, process.env.VAPID_PRIVATE_KEY);
-      results.push = await Promise.allSettled(subscriptions.map(s=>webpush.default.sendNotification(s, JSON.stringify({ title:'Virtual AI Office', body:`Completed: ${task.title}`, taskId:task.id }))));
+      results.push = await Promise.allSettled(subscriptions.map(s=>webpush.default.sendNotification(s, JSON.stringify({ title:'ISystem', body:`Completed: ${task.title}`, taskId:task.id }))));
     } catch(e) { results.push = { error:e.message }; }
   }
   return results;
@@ -73,4 +73,4 @@ export async function graphRequest(path, method, body) {
   const data = await response.json().catch(()=>({}));
   if (!response.ok) throw new Error(data.error?.message || `Microsoft Graph HTTP ${response.status}`);
   return data;
-}
+    }

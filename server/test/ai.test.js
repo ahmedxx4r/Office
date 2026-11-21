@@ -8,6 +8,6 @@ test('AI adapter enters demo mode without making a network request', async () =>
 });
 test('demo output clearly identifies demo limitations', () => {
   const output = demoResponse({ name:'Agent One', role:'Tester' }, { title:'Test task', description:'Test brief' });
-  assert.match(output, /demo-mode/i);
-  assert.match(output, /No external accounts/i);
+  assert.match(output, /demo mode/i);
+  assert.match(output, /not an AI-generated deliverable/i);
 });
