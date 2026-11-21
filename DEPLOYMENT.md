@@ -16,7 +16,7 @@ Create a GitHub repository named **office** (empty repository; do not add a seco
 ```powershell
 git init
 git add .
-git commit -m "Initial Virtual AI Office"
+git commit -m "Initial ISystem"
 git branch -M main
 git remote add origin https://github.com/YOUR_GITHUB_USERNAME/office.git
 git push -u origin main
@@ -80,9 +80,8 @@ The React app displays an owner sign-in screen when the API reports that authent
 3. Confirm employee state loads from the API.
 4. Open browser DevTools → Network and verify `/api/state` returns 200.
 5. Confirm Socket.IO connects to the API host.
-6. Create a test task and verify it moves to **Needs Review**.
-7. Approve it and verify it becomes **Completed**.
-8. Check Render logs and `/api/health` for database and queue mode.
+6. Create a test task and verify it moves from **Queued** to **In Progress** to **Completed**.
+7. Check Render logs and `/api/health` for database and queue mode.
 
 ## 7. Continuous integration
 
