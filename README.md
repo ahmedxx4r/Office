@@ -1,4 +1,4 @@
-# Office — Virtual AI Workforce
+# ISystem — AI Workforce Platform
 
 A full-screen, isometric 3D office simulation for managing a team of AI employees. The main interaction is the office floor itself: select an employee in the scene to open their profile, chat with them, assign work, inspect their output, or invite them to a meeting.
 
@@ -7,10 +7,11 @@ A full-screen, isometric 3D office simulation for managing a team of AI employee
 - Large isometric 3D office with workstations, meeting room, lounge, recreation zone, plants, windows and office props.
 - Low-poly human employee avatars with live status labels and movement between work areas.
 - Pan, orbit, zoom, reset camera, and click-to-select employees.
-- Direct employee chat, system prompt editing, task assignment and meeting invitations.
-- General Manager goal planning and specialist task execution.
-- Task lifecycle: Queued → In Progress / In Meeting → Needs Review → Completed.
-- Socket.IO live state, optional browser push notifications, Microsoft Graph email/calendar endpoints and Twilio notification integration.
+- Direct employee chat, task assignment and meeting invitations for the six-person NEXLOVA team (Marketing, Data, Finance, Content, Development, HR & Operations).
+- Marketing specialist Omar can publish and schedule Facebook/Instagram posts through Buffer (see `docs/publishing-api.md`).
+- Task lifecycle: Queued → In Progress → Completed (or Failed, with retry).
+- Server-side integrations: Microsoft Graph email/calendar endpoints and Twilio voice notification (need provider credentials).
+- Planned / not yet wired end to end: the server emits live state over Socket.IO and has Web Push support, but the current frontend does not yet subscribe to Socket.IO or register the push service worker.
 
 ## Architecture
 
@@ -20,7 +21,7 @@ This repository is an npm-workspaces monorepo:
 - `server/`: Express + Socket.IO API and BullMQ worker. Runs as a persistent Node service (Render Blueprint included).
 - PostgreSQL: durable shared state store.
 - Redis: BullMQ task queue.
-- `docs/agent-prompts.md`: role-specific system prompts.
+- `server/src/agents.js`: the six employees and their system prompts (see `docs/agent-prompts.md`).
 - `DEPLOYMENT.md`: GitHub + Vercel + API deployment guide.
 
 The API/worker is intentionally not deployed as a Vercel static function. A BullMQ worker and Socket.IO server need a persistent runtime. Vercel hosts the frontend and automatically deploys it from GitHub; Render hosts the persistent API/worker; managed PostgreSQL and Redis provide storage/queue services.
