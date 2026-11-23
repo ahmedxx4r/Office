@@ -387,3 +387,12 @@ body{
 .chat-thinking small{font:500 10px Alexandria,sans-serif}
 @media(max-width:900px){.chat-layout-modern{grid-template-columns:205px minmax(0,1fr);gap:12px}.chat-agent-meta small{max-width:105px}}
 @media(max-width:650px){.chat-layout-modern{grid-template-columns:1fr;min-height:auto}.chat-layout-modern .chat-team{max-height:175px}.chat-layout-modern .chat-agent{width:calc(50% - 5px);display:inline-flex}.chat-layout-modern .chat-agent-meta small{max-width:calc(100vw - 115px)}.conversation-modern{min-height:590px}.conversation-header{padding:14px}.messages-modern{padding:15px 12px}.message-modern{max-width:94%;padding:12px 14px}.message-modern p{font-size:13px;line-height:1.85}.chat-compose-modern{padding:12px}.chat-compose-modern .primary{min-width:86px}}
+
+.mic-button{min-width:44px;height:44px;border-radius:12px;border:1px solid var(--border,#2a2f3a);background:var(--panel,#161a22);color:inherit;font-size:18px;cursor:pointer}
+.mic-button.listening{background:#E0243A;border-color:#E0243A;animation:mic-pulse 1.2s infinite}
+@keyframes mic-pulse{0%,100%{opacity:1}50%{opacity:.55}}
+.office-fullscreen-trigger.active-voice{border-color:#14C3A2;color:#14C3A2}
+.chat-team .office-task-trigger{display:block;width:100%;margin:8px 0 4px;background:linear-gradient(120deg,#8f7df2,#6e74cb);border:0;color:#fff;border-radius:12px;padding:11px 14px;font:700 12px 'IBM Plex Sans Arabic','Inter',sans-serif;text-align:right}
+.chat-team .office-fullscreen-trigger{display:block;width:100%;margin:6px 0;background:#151f26;border:1px solid #34454d;color:#dce8e8;border-radius:12px;padding:11px 14px;font:600 12px 'IBM Plex Sans Arabic','Inter',sans-serif;text-align:right}
+.chat-team .office-fullscreen-trigger.active-voice{border-color:#14C3A2;color:#14C3A2}
+.chat-team .office-task-trigger:disabled{opacity:.6}

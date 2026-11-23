@@ -13,14 +13,16 @@ import { notifyTaskComplete, graphRequest } from './notifications.js';
 import { registerInstagramRoutes } from './integrations/instagram.js';
 import { registerBufferRoutes } from './integrations/buffer.js';
 import { registerPostRoutes, publishFromChat } from './posts.js';
+import { registerWhatsAppRoutes } from './whatsapp.js';
+import { managerReply, managerBriefing, makeManagerPair, isApproval, isRejection, findAwaitingAction, queueAction, resolveAction, MANAGER_ID, MANAGER_NAME } from './manager.js';
 
 const app = express();
 const server = createServer(app);
 const allowedOrigins = process.env.VERCEL === '1' ? ['*'] : (process.env.CLIENT_ORIGIN || 'http://localhost:5173').split(',').map(v => v.trim()).filter(Boolean);
 const corsOptions = { origin: (origin, cb) => !origin || allowedOrigins.includes('*') || allowedOrigins.includes(origin) ? cb(null, true) : cb(new Error('Origin not allowed')), credentials: true };
 app.use(cors(corsOptions));
-app.use(express.json({ limit: '1mb' }));
-app.use('/api', (req,res,next) => ['/health','/auth/config','/auth/login','/integrations/instagram/callback'].includes(req.path) ? next() : requireOwner(req,res,next));
+app.use(express.json({ limit: '1mb', verify: (req, _res, buf) => { req.rawBody = buf; } }));
+app.use('/api', (req,res,next) => ['/health','/auth/config','/auth/login','/integrations/instagram/callback','/whatsapp/webhook'].includes(req.path) ? next() : requireOwner(req,res,next));
 
 const io = new Server(server, { cors: { origin: allowedOrigins, methods: ['GET','POST'], credentials: true } });
 const emit = (event, payload={}) => { const entry={ id:uuid(), type:event, payload, at:new Date().toISOString() }; update(s=>s.events.unshift(entry)); io.emit('office:event',entry); io.emit('office:state',getState()); };
@@ -89,6 +91,58 @@ app.post('/api/tasks',async(req,res)=>{
 app.patch('/api/tasks/:id',(req,res)=>{let task;update(s=>{task=s.tasks.find(t=>t.id===req.params.id);if(task&&['Queued','In Progress','Completed','Failed'].includes(req.body?.status))task.status=req.body.status;});if(!task)return res.status(404).json({error:'Task not found'});emit('task:updated',{taskId:task.id});res.json(task);});
 app.post('/api/tasks/:id/retry',async(req,res)=>{const task=getState().tasks.find(t=>t.id===req.params.id);if(!task)return res.status(404).json({error:'Task not found'});update(s=>{const t=s.tasks.find(x=>x.id===task.id);t.status='Queued';t.output=null;t.error=null;});if(process.env.VERCEL==='1'){await processTask(task.id);return res.json(getState().tasks.find(t=>t.id===task.id));}enqueueTask(task.id).catch(console.error);res.json({ok:true});});
 app.delete('/api/tasks/:id',(req,res)=>{let removed=false;update(s=>{const n=s.tasks.length;s.tasks=s.tasks.filter(t=>t.id!==req.params.id);removed=n!==s.tasks.length;});if(!removed)return res.status(404).json({error:'Task not found'});emit('task:deleted',{taskId:req.params.id});res.json({ok:true});});
+
+const runTaskConfirm=async(pending)=>{
+ const agent=getState().agents.find(a=>a.id===pending.agentId)||getState().agents[0];
+ if(!agent)return null;
+ const task={id:uuid(),title:String(pending.title||'مهمة جديدة').slice(0,300),description:String(pending.description||''),agentId:agent.id,status:'Queued',priority:pending.priority||'normal',createdAt:new Date().toISOString(),updatedAt:new Date().toISOString(),acceptanceCriteria:[],dependsOn:[],output:null,logs:[{at:new Date().toISOString(),message:'Task created via manager confirmation'}]};
+ update(s=>s.tasks.unshift(task));emit('task:created',{taskId:task.id});
+ if(process.env.VERCEL==='1'){await processTask(task.id);}else{enqueueTask(task.id).catch(console.error);}
+ return {title:task.title,agentName:agent.name};
+};
+
+app.post('/api/manager/chat',async(req,res)=>{
+ const {message}=req.body||{};
+ if(!message?.trim())return res.status(400).json({error:'Message is required'});
+ const clean=String(message).trim().slice(0,4000);
+ const history=getState().messages.filter(m=>m.agentId===MANAGER_ID).slice(-12);
+ let reply;
+ if(isApproval(clean)){
+   const pending=findAwaitingAction();
+   if(pending&&pending.kind==='create_task'){
+     resolveAction(pending.id,'approved');
+     const task=await runTaskConfirm(pending);
+     reply=task?`تمام يا مدير، سجلت التاسك "${task.title}" عند ${task.agentName}. هقولك أول ما يخلص.`:'حصلت مشكلة في تسجيل التاسك، جرب تاني لو سمحت.';
+   } else if(pending){
+     resolveAction(pending.id,'needs_app');
+     reply='الإجراء ده محتاج يتأكد من جوه التطبيق نفسه. افتح ISystem وهتلاقيه جاهز.';
+   }
+ }
+ if(!reply&&isRejection(clean)){
+   const pending=findAwaitingAction();
+   if(pending){
+     resolveAction(pending.id,'rejected');
+     reply='تمام يا مدير، ألغيت الطلب ومش هيتنفذ. لو احتجته تاني قولي.';
+   }
+ }
+ if(!reply){
+   reply=await managerReply({message:clean,history});
+   if(/^(اعمل|ضيف|سجل|كلّم|كلف|عيّن|start|create|add task|مهمة|تاسك)/i.test(clean)&&!/\?|؟/.test(clean)){
+     queueAction({kind:'create_task',title:clean.slice(0,300)});
+   }
+ }
+ if(!reply)return res.status(503).json({error:'AI provider key is not configured. Add OPENAI_API_KEY in Vercel Environment Variables.'});
+ const pair=makeManagerPair(clean,reply);
+ update(s=>s.messages.push(...pair));emit('chat:message',{agentId:MANAGER_ID});
+ res.json({messages:pair});
+});
+app.get('/api/manager/briefing',async(_req,res)=>{
+ const briefing=await managerBriefing();
+ const entry={id:uuid(),agentId:MANAGER_ID,sender:MANAGER_NAME,content:briefing,at:new Date().toISOString()};
+ update(s=>s.messages.push(entry));emit('chat:message',{agentId:MANAGER_ID});
+ res.json({briefing});
+});
+registerWhatsAppRoutes(app,{runTaskConfirm});
 
 app.get('/api/meetings',(_req,res)=>res.json(getState().meetings||[]));
 app.post('/api/meetings',(req,res)=>{const {title='Team Meeting',agentIds=[]}=req.body||{};if(!Array.isArray(agentIds)||agentIds.some(id=>!getState().agents.some(a=>a.id===id)))return res.status(400).json({error:'Invalid agent IDs'});const meeting={id:uuid(),title,agentIds,createdAt:new Date().toISOString(),status:'active'};update(s=>{s.meetings.push(meeting);for(const id of agentIds){const a=s.agents.find(x=>x.id===id);if(a)a.status='meeting';}});emit('meeting:started',{meetingId:meeting.id});res.status(201).json(meeting);});
