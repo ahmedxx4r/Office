@@ -1,4 +1,4 @@
-# ISystem team and prompts
+# Dawwar team and prompts
 
 The system prompts and settings for every employee live in `server/src/agents.js` (`seedAgents`). Edit them there; this file only lists the team.
 
