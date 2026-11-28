@@ -35,13 +35,13 @@ const bufferQuery = query => bufferRequest(query);
 export function registerBufferRoutes(app) {
   app.get('/api/integrations/buffer/status', async (_req, res) => {
     try {
-      const account = await bufferQuery(`query ISystemBufferAccount {
+      const account = await bufferQuery(`query DawwarBufferAccount {
         account { id name email organizations { id name } }
       }`);
       const organizations = account.account?.organizations || [];
       const org = organizations[0];
       if (!org) return res.json({ connected: true, account: account.account, organizations: [], channels: [] });
-      const channelsData = await bufferQuery(`query ISystemBufferChannels {
+      const channelsData = await bufferQuery(`query DawwarBufferChannels {
         channels(input: { organizationId: "${org.id}" }) { id name service }
       }`);
       const channels = channelsData.channels || [];
@@ -60,12 +60,12 @@ export function registerBufferRoutes(app) {
 
 
 export async function publishBufferPost({ service, text, assetUrl, mode = 'addToQueue', dueAt }) {
-  const account = await bufferQuery(`query ISystemBufferPublishTargets {
+  const account = await bufferQuery(`query DawwarBufferPublishTargets {
     account { organizations { id name } }
   }`);
   const organization = account.account?.organizations?.[0];
   if (!organization) throw new Error('No Buffer organization is connected.');
-  const channelData = await bufferQuery(`query ISystemBufferPublishChannels {
+  const channelData = await bufferQuery(`query DawwarBufferPublishChannels {
     channels(input: { organizationId: "${organization.id}" }) { id name service isDisconnected }
   }`);
   const channel = (channelData.channels || []).find(item => item.service === service && !item.isDisconnected);
@@ -82,7 +82,7 @@ export async function publishBufferPost({ service, text, assetUrl, mode = 'addTo
     metadata: service === 'facebook' ? { facebook: { type: 'post' } } : { instagram: { type: 'post', shouldShareToFeed: true } }
   };
   if (!input.text) throw new Error('Post text is empty.');
-  const mutation = `mutation ISystemCreatePost($input: CreatePostInput!) {
+  const mutation = `mutation DawwarCreatePost($input: CreatePostInput!) {
     createPost(input: $input) {
       ... on PostActionSuccess { post { id text status dueAt externalLink } }
       ... on MutationError { message }
@@ -96,7 +96,7 @@ export async function publishBufferPost({ service, text, assetUrl, mode = 'addTo
 }
 
 export async function deleteBufferPost(id) {
-  const result = await bufferRequest(`mutation ISystemDeletePost($input: DeletePostInput!) {
+  const result = await bufferRequest(`mutation DawwarDeletePost($input: DeletePostInput!) {
     deletePost(input: $input) { __typename ... on MutationError { message } }
   }`, { input: { id } });
   if (result.deletePost?.message) { const error = new Error(result.deletePost.message); error.retryable = false; throw error; }
@@ -104,7 +104,7 @@ export async function deleteBufferPost(id) {
 }
 
 export async function getBufferPost(id) {
-  const data = await bufferQuery(`query ISystemGetPost {
+  const data = await bufferQuery(`query DawwarGetPost {
     post(input: { id: ${JSON.stringify(String(id))} }) { id status dueAt externalLink }
   }`);
   return data.post || null;
