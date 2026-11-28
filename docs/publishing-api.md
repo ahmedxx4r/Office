@@ -18,4 +18,4 @@ All endpoints need the owner token like the rest of `/api`. Times without an off
 Statuses: `Draft`, `Scheduled`, `Publishing`, `Published`, `Failed`, `Canceled`.
 Duplicates (same service + text + media within 24h) are rejected unless `"allowDuplicate": true`.
 Temporary Buffer errors (429 / 5xx / network) are retried up to 3 times; permanent errors mark the post `Failed` with the reason.
-Scheduled and queued posts live inside Buffer, so they publish even when ISystem is closed.
+Scheduled and queued posts live inside Buffer, so they publish even when Dawwar is closed.
