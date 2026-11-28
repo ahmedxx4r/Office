@@ -28,7 +28,11 @@
   ],
   "rewrites": [
     {
-      "source": "/((?!api/).*)",
+      "source": "/office",
+      "destination": "/office.html"
+    },
+    {
+      "source": "/((?!api/|office|office.html).*)",
       "destination": "/index.html"
     }
   ],
