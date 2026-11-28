@@ -1,14 +1,882 @@
-<!doctype html>
-<html lang="en">
-  <head>
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <meta name="theme-color" content="#0b0f14" />
-    <meta name="description" content="ISystem by NEXLOVA — AI Workforce Platform." />
-    <title>ISystem — AI Workforce Platform</title>
-  </head>
-  <body>
-    <div id="root"></div>
-    <script type="module" src="/src/main.jsx"></script>
-  </body>
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
+  <title>دوّار | شغلك داير، وفريقك حاضر</title>
+  <meta name="description" content="دوّار — شركة افتراضية بالذكاء الاصطناعي. مكتب ثلاثي الأبعاد فيه ٦ موظفين AI، بتكلّمهم بالمصري وهما بيشتغلوا معاك." />
+  <meta name="theme-color" content="#101B2D" />
+  <link rel="icon" type="image/png" sizes="64x64" href="/favicon-64.png" />
+  <link rel="apple-touch-icon" href="/apple-touch-icon.png" />
+
+  <!-- Fonts -->
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Alexandria:wght@400;500;600;700;800&family=Space+Grotesk:wght@400;500;600;700&display=swap" rel="stylesheet" />
+
+  <style>
+    :root {
+      --midnight: #101B2D;
+      --teal: #25BFAE;
+      --aqua: #42D6C4;
+      --slate: #243650;
+      --cloud: #F2F6F7;
+      --white: #FFFFFF;
+      --radius: 16px;
+      --radius-lg: 24px;
+      --shadow: 0 20px 50px rgba(0,0,0,0.35);
+      --transition: 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+    }
+
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    html {
+      scroll-behavior: smooth;
+      -webkit-text-size-adjust: 100%;
+    }
+
+    body {
+      font-family: "Alexandria", system-ui, sans-serif;
+      background: var(--midnight);
+      color: var(--cloud);
+      line-height: 1.7;
+      overflow-x: hidden;
+      min-height: 100dvh;
+    }
+
+    img, svg { display: block; max-width: 100%; }
+    a { color: inherit; text-decoration: none; }
+    button { font-family: inherit; cursor: pointer; border: none; background: none; }
+
+    /* ===== UTILITIES ===== */
+    .container {
+      width: min(1120px, 92%);
+      margin-inline: auto;
+    }
+
+    .btn {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 0.5rem;
+      padding: 0.9rem 1.6rem;
+      border-radius: 999px;
+      font-weight: 600;
+      font-size: 1rem;
+      transition: transform var(--transition), box-shadow var(--transition), background var(--transition);
+      white-space: nowrap;
+    }
+
+    .btn-primary {
+      background: linear-gradient(135deg, var(--teal), var(--aqua));
+      color: var(--midnight);
+      box-shadow: 0 8px 24px rgba(37, 191, 174, 0.35);
+    }
+    .btn-primary:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 12px 32px rgba(37, 191, 174, 0.45);
+    }
+
+    .btn-ghost {
+      background: transparent;
+      color: var(--cloud);
+      border: 1.5px solid rgba(242, 246, 247, 0.25);
+    }
+    .btn-ghost:hover {
+      border-color: var(--teal);
+      color: var(--teal);
+    }
+
+    .section-label {
+      display: inline-block;
+      font-size: 0.8rem;
+      font-weight: 600;
+      letter-spacing: 0.04em;
+      color: var(--teal);
+      background: rgba(37, 191, 174, 0.12);
+      padding: 0.35rem 0.9rem;
+      border-radius: 999px;
+      margin-bottom: 1rem;
+    }
+
+    .section-title {
+      font-size: clamp(1.75rem, 5vw, 2.5rem);
+      font-weight: 700;
+      line-height: 1.25;
+      margin-bottom: 0.75rem;
+    }
+
+    .section-desc {
+      font-size: 1.05rem;
+      color: rgba(242, 246, 247, 0.75);
+      max-width: 38ch;
+    }
+
+    /* ===== LOGO ===== */
+    .logo {
+      display: flex;
+      align-items: center;
+      gap: 0.75rem;
+    }
+
+    .logo-mark {
+      width: 42px;
+      height: 42px;
+      flex-shrink: 0;
+    }
+
+    .logo-text {
+      font-family: "Space Grotesk", sans-serif;
+      font-weight: 700;
+      font-size: 1.35rem;
+      letter-spacing: -0.02em;
+      color: var(--white);
+    }
+    .logo-text span {
+      color: var(--teal);
+      font-family: "Alexandria", sans-serif;
+      font-weight: 700;
+      margin-right: 0.25rem;
+    }
+
+    /* ===== NAV ===== */
+    .nav {
+      position: fixed;
+      top: 0;
+      inset-inline: 0;
+      z-index: 100;
+      padding: 1rem 0;
+      background: rgba(16, 27, 45, 0.75);
+      backdrop-filter: blur(16px);
+      -webkit-backdrop-filter: blur(16px);
+      border-bottom: 1px solid rgba(242, 246, 247, 0.06);
+      transition: padding var(--transition);
+    }
+
+    .nav-inner {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 1rem;
+    }
+
+    .nav-links {
+      display: none;
+      gap: 1.75rem;
+      font-size: 0.95rem;
+      font-weight: 500;
+      color: rgba(242, 246, 247, 0.8);
+    }
+    .nav-links a:hover { color: var(--teal); }
+
+    .nav-cta { display: none; }
+
+    @media (min-width: 768px) {
+      .nav-links, .nav-cta { display: flex; }
+    }
+
+    /* ===== HERO ===== */
+    .hero {
+      position: relative;
+      padding: 7.5rem 0 5rem;
+      overflow: hidden;
+      text-align: center;
+    }
+
+    .hero::before {
+      content: "";
+      position: absolute;
+      top: -20%;
+      left: 50%;
+      transform: translateX(-50%);
+      width: 140%;
+      height: 70%;
+      background: radial-gradient(ellipse at center, rgba(37, 191, 174, 0.18) 0%, transparent 65%);
+      pointer-events: none;
+    }
+
+    .hero-logo {
+      width: min(220px, 55vw);
+      margin: 0 auto 1.75rem;
+      filter: drop-shadow(0 12px 40px rgba(37, 191, 174, 0.25));
+    }
+
+    .hero h1 {
+      font-size: clamp(1.9rem, 6.5vw, 3.1rem);
+      font-weight: 800;
+      line-height: 1.2;
+      margin-bottom: 1rem;
+      letter-spacing: -0.02em;
+    }
+
+    .hero h1 .highlight {
+      background: linear-gradient(135deg, var(--teal), var(--aqua));
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+    }
+
+    .hero-lead {
+      font-size: clamp(1.05rem, 3vw, 1.2rem);
+      color: rgba(242, 246, 247, 0.78);
+      max-width: 34ch;
+      margin: 0 auto 2rem;
+    }
+
+    .hero-ctas {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 0.85rem;
+      justify-content: center;
+    }
+
+    .hero-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.5rem;
+      margin-top: 2.5rem;
+      font-size: 0.85rem;
+      color: rgba(242, 246, 247, 0.55);
+    }
+    .hero-badge::before {
+      content: "";
+      width: 8px;
+      height: 8px;
+      border-radius: 50%;
+      background: var(--teal);
+      box-shadow: 0 0 0 4px rgba(37, 191, 174, 0.2);
+    }
+
+    /* ===== SECTIONS ===== */
+    section {
+      padding: 4.5rem 0;
+    }
+
+    /* ===== IDEA ===== */
+    .idea {
+      background: linear-gradient(180deg, transparent, rgba(36, 54, 80, 0.35) 40%, transparent);
+    }
+
+    .idea-grid {
+      display: grid;
+      gap: 2.5rem;
+      align-items: center;
+    }
+
+    @media (min-width: 768px) {
+      .idea-grid {
+        grid-template-columns: 1fr 1fr;
+        gap: 4rem;
+      }
+    }
+
+    .idea-card {
+      background: var(--slate);
+      border-radius: var(--radius-lg);
+      padding: 1.75rem;
+      border: 1px solid rgba(242, 246, 247, 0.06);
+      position: relative;
+      overflow: hidden;
+    }
+
+    .idea-card::after {
+      content: "";
+      position: absolute;
+      inset: 0;
+      background: radial-gradient(circle at 80% 20%, rgba(37, 191, 174, 0.12), transparent 60%);
+      pointer-events: none;
+    }
+
+    .idea-visual {
+      aspect-ratio: 4/3;
+      border-radius: 12px;
+      background: linear-gradient(145deg, #0d1524, #1a2a40);
+      display: grid;
+      place-items: center;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .office-glow {
+      position: absolute;
+      width: 180px;
+      height: 180px;
+      border-radius: 50%;
+      background: radial-gradient(circle, rgba(37, 191, 174, 0.25), transparent 70%);
+      filter: blur(20px);
+    }
+
+    .office-label {
+      position: relative;
+      z-index: 1;
+      text-align: center;
+      font-size: 0.95rem;
+      color: rgba(242, 246, 247, 0.7);
+    }
+    .office-label strong {
+      display: block;
+      font-size: 1.4rem;
+      color: var(--aqua);
+      margin-bottom: 0.25rem;
+    }
+
+    /* ===== HOW ===== */
+    .how-steps {
+      display: grid;
+      gap: 1.25rem;
+      margin-top: 2.5rem;
+    }
+
+    @media (min-width: 640px) {
+      .how-steps {
+        grid-template-columns: repeat(3, 1fr);
+      }
+    }
+
+    .step {
+      background: rgba(36, 54, 80, 0.55);
+      border: 1px solid rgba(242, 246, 247, 0.06);
+      border-radius: var(--radius);
+      padding: 1.5rem 1.35rem;
+      transition: border-color var(--transition), transform var(--transition);
+    }
+    .step:hover {
+      border-color: rgba(37, 191, 174, 0.35);
+      transform: translateY(-3px);
+    }
+
+    .step-num {
+      font-family: "Space Grotesk", sans-serif;
+      font-weight: 700;
+      font-size: 1.5rem;
+      color: var(--teal);
+      margin-bottom: 0.75rem;
+    }
+
+    .step h3 {
+      font-size: 1.15rem;
+      font-weight: 700;
+      margin-bottom: 0.4rem;
+    }
+
+    .step p {
+      font-size: 0.95rem;
+      color: rgba(242, 246, 247, 0.7);
+    }
+
+    /* ===== TEAM ===== */
+    .team {
+      background: linear-gradient(180deg, transparent, rgba(16, 27, 45, 0.9));
+    }
+
+    .team-grid {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 1rem;
+      margin-top: 2.5rem;
+    }
+
+    @media (min-width: 640px) {
+      .team-grid {
+        grid-template-columns: repeat(3, 1fr);
+        gap: 1.25rem;
+      }
+    }
+
+    .member {
+      background: var(--slate);
+      border-radius: var(--radius);
+      padding: 1.35rem 1.1rem;
+      text-align: center;
+      border: 1px solid rgba(242, 246, 247, 0.05);
+      transition: border-color var(--transition), transform var(--transition);
+    }
+    .member:hover {
+      border-color: rgba(37, 191, 174, 0.3);
+      transform: translateY(-3px);
+    }
+
+    .member-avatar {
+      width: 56px;
+      height: 56px;
+      border-radius: 50%;
+      margin: 0 auto 0.85rem;
+      background: linear-gradient(135deg, var(--teal), var(--aqua));
+      display: grid;
+      place-items: center;
+      font-weight: 700;
+      font-size: 1.2rem;
+      color: var(--midnight);
+    }
+
+    .member h3 {
+      font-size: 1.05rem;
+      font-weight: 700;
+      margin-bottom: 0.2rem;
+    }
+
+    .member .role {
+      font-size: 0.85rem;
+      color: var(--teal);
+      font-weight: 500;
+    }
+
+    /* ===== WHY ===== */
+    .why-list {
+      display: grid;
+      gap: 1rem;
+      margin-top: 2.25rem;
+    }
+
+    @media (min-width: 640px) {
+      .why-list {
+        grid-template-columns: 1fr 1fr;
+      }
+    }
+
+    .why-item {
+      display: flex;
+      gap: 1rem;
+      align-items: flex-start;
+      padding: 1.25rem;
+      background: rgba(36, 54, 80, 0.4);
+      border-radius: var(--radius);
+      border: 1px solid rgba(242, 246, 247, 0.05);
+    }
+
+    .why-icon {
+      width: 40px;
+      height: 40px;
+      flex-shrink: 0;
+      border-radius: 10px;
+      background: rgba(37, 191, 174, 0.15);
+      display: grid;
+      place-items: center;
+      color: var(--teal);
+    }
+
+    .why-item h3 {
+      font-size: 1.05rem;
+      font-weight: 700;
+      margin-bottom: 0.25rem;
+    }
+
+    .why-item p {
+      font-size: 0.92rem;
+      color: rgba(242, 246, 247, 0.7);
+    }
+
+    /* ===== CTA ===== */
+    .cta {
+      padding: 5rem 0;
+    }
+
+    .cta-box {
+      background: linear-gradient(145deg, #152033, #1c2d45);
+      border-radius: var(--radius-lg);
+      padding: 3rem 1.75rem;
+      text-align: center;
+      border: 1px solid rgba(37, 191, 174, 0.2);
+      position: relative;
+      overflow: hidden;
+    }
+
+    .cta-box::before {
+      content: "";
+      position: absolute;
+      top: -50%;
+      left: 50%;
+      transform: translateX(-50%);
+      width: 80%;
+      height: 100%;
+      background: radial-gradient(ellipse, rgba(37, 191, 174, 0.15), transparent 70%);
+      pointer-events: none;
+    }
+
+    .cta-box h2 {
+      font-size: clamp(1.6rem, 4.5vw, 2.2rem);
+      font-weight: 800;
+      margin-bottom: 0.75rem;
+      position: relative;
+    }
+
+    .cta-box p {
+      color: rgba(242, 246, 247, 0.75);
+      margin-bottom: 1.75rem;
+      max-width: 32ch;
+      margin-inline: auto;
+      position: relative;
+    }
+
+    .cta-actions {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 0.85rem;
+      justify-content: center;
+      position: relative;
+    }
+
+    /* ===== FOOTER ===== */
+    footer {
+      padding: 2.5rem 0 2rem;
+      border-top: 1px solid rgba(242, 246, 247, 0.06);
+    }
+
+    .footer-inner {
+      display: flex;
+      flex-direction: column;
+      gap: 1.5rem;
+      align-items: center;
+      text-align: center;
+    }
+
+    @media (min-width: 640px) {
+      .footer-inner {
+        flex-direction: row;
+        justify-content: space-between;
+        text-align: start;
+      }
+    }
+
+    .footer-copy {
+      font-size: 0.85rem;
+      color: rgba(242, 246, 247, 0.45);
+    }
+
+    .footer-tag {
+      font-size: 0.9rem;
+      color: rgba(242, 246, 247, 0.6);
+    }
+
+    /* ===== MOBILE MENU ===== */
+    .menu-btn {
+      display: flex;
+      flex-direction: column;
+      gap: 5px;
+      padding: 0.4rem;
+    }
+    .menu-btn span {
+      display: block;
+      width: 22px;
+      height: 2px;
+      background: var(--cloud);
+      border-radius: 2px;
+      transition: var(--transition);
+    }
+
+    @media (min-width: 768px) {
+      .menu-btn { display: none; }
+    }
+
+    .mobile-menu {
+      display: none;
+      position: fixed;
+      inset: 0;
+      background: rgba(16, 27, 45, 0.97);
+      z-index: 99;
+      padding: 5rem 1.5rem 2rem;
+      flex-direction: column;
+      gap: 1.5rem;
+      align-items: center;
+    }
+    .mobile-menu.open { display: flex; }
+    .mobile-menu a {
+      font-size: 1.25rem;
+      font-weight: 600;
+    }
+  </style>
+</head>
+<body>
+
+  <!-- NAV -->
+  <header class="nav">
+    <div class="container nav-inner">
+      <a href="#" class="logo" aria-label="دوّار">
+        <svg class="logo-mark" viewBox="0 0 48 48" fill="none" xmlns="http://www.w3.org/2000/svg">
+          <defs>
+            <linearGradient id="g1" x1="0%" y1="0%" x2="100%" y2="100%">
+              <stop offset="0%" stop-color="#25BFAE"/>
+              <stop offset="100%" stop-color="#42D6C4"/>
+            </linearGradient>
+          </defs>
+          <path d="M24 6C14.06 6 6 14.06 6 24s8.06 18 18 18 18-8.06 18-18" stroke="url(#g1)" stroke-width="4.5" stroke-linecap="round" fill="none"/>
+          <path d="M38 14 L42 10 L38 6" stroke="url(#g1)" stroke-width="4.5" stroke-linecap="round" stroke-linejoin="round" fill="none"/>
+        </svg>
+        <span class="logo-text">Dawwar <span>دوّار</span></span>
+      </a>
+
+      <nav class="nav-links" aria-label="القائمة الرئيسية">
+        <a href="#idea">الفكرة</a>
+        <a href="#how">إزاي بيشتغل</a>
+        <a href="#team">الفريق</a>
+        <a href="#why">ليه دوّار</a>
+      </nav>
+
+      <a href="/office" class="btn btn-primary nav-cta">جرّب دوّار</a>
+
+      <button class="menu-btn" aria-label="فتح القائمة" id="menuBtn">
+        <span></span><span></span><span></span>
+      </button>
+    </div>
+  </header>
+
+  <div class="mobile-menu" id="mobileMenu">
+    <a href="#idea" onclick="closeMenu()">الفكرة</a>
+    <a href="#how" onclick="closeMenu()">إزاي بيشتغل</a>
+    <a href="#team" onclick="closeMenu()">الفريق</a>
+    <a href="#why" onclick="closeMenu()">ليه دوّار</a>
+    <a href="/office" class="btn btn-primary" onclick="closeMenu()">جرّب دوّار</a>
+  </div>
+
+  <main>
+    <!-- HERO -->
+    <section class="hero">
+      <div class="container">
+        <!-- Full logo recreation -->
+        <svg class="hero-logo" viewBox="0 0 280 200" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+          <defs>
+            <linearGradient id="arc" x1="0%" y1="0%" x2="100%" y2="100%">
+              <stop offset="0%" stop-color="#25BFAE"/>
+              <stop offset="50%" stop-color="#42D6C4"/>
+              <stop offset="100%" stop-color="#25BFAE"/>
+            </linearGradient>
+          </defs>
+          <!-- Circular arrow -->
+          <path d="M140 28 C78 28 28 78 28 140 C28 202 78 252 140 252 C180 252 215 232 235 200" 
+                stroke="url(#arc)" stroke-width="14" stroke-linecap="round" fill="none" transform="scale(0.72) translate(40, -20)"/>
+          <path d="M220 48 L240 32 L222 18" stroke="url(#arc)" stroke-width="12" stroke-linecap="round" stroke-linejoin="round" fill="none"/>
+          <!-- Text -->
+          <text x="140" y="105" text-anchor="middle" fill="#FFFFFF" font-family="Space Grotesk, sans-serif" font-weight="700" font-size="42" letter-spacing="-1">Dawwar</text>
+          <text x="140" y="148" text-anchor="middle" fill="url(#arc)" font-family="Alexandria, sans-serif" font-weight="700" font-size="36">دوّار</text>
+        </svg>
+
+        <h1>
+          شغلك <span class="highlight">داير</span>،<br />
+          وفريقك <span class="highlight">حاضر</span>.
+        </h1>
+
+        <p class="hero-lead">
+          شركة افتراضية بالذكاء الاصطناعي. مكتب ثلاثي الأبعاد فيه ٦ موظفين AI، بتكلّمهم بالمصري وهما بيشتغلوا معاك.
+        </p>
+
+        <div class="hero-ctas">
+          <a href="/office" class="btn btn-primary">جرّب دوّار</a>
+          <a href="#idea" class="btn btn-ghost">اعرف أكتر</a>
+        </div>
+
+        <div class="hero-badge">مخصص لأصحاب المشاريع والمتاجر في مصر</div>
+      </div>
+    </section>
+
+    <!-- IDEA -->
+    <section class="idea" id="idea">
+      <div class="container">
+        <div class="idea-grid">
+          <div>
+            <span class="section-label">الفكرة</span>
+            <h2 class="section-title">مكتب كامل… من غير ما تطلع من مكانك</h2>
+            <p class="section-desc" style="margin-bottom: 1.25rem;">
+              دوّار مش أداة تانية. دي شركة افتراضية كاملة: ٦ موظفين AI، كل واحد ليه تخصص، بيشتغلوا مع بعض ويتابعوا الشغل من مكان واحد.
+            </p>
+            <p class="section-desc">
+              بتكلّمهم بالمصري العادي زي ما بتتكلم مع أي حد في فريقك. هما بيفهموا، بيقسموا المهام، وبيشتغلوا.
+            </p>
+          </div>
+
+          <div class="idea-card">
+            <div class="idea-visual">
+              <div class="office-glow"></div>
+              <div class="office-label">
+                <strong>المكتب الافتراضي</strong>
+                ٦ موظفين · تخصصات مختلفة · مكان واحد
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- HOW -->
+    <section id="how">
+      <div class="container">
+        <div style="text-align: center; max-width: 36ch; margin-inline: auto;">
+          <span class="section-label">إزاي بيشتغل</span>
+          <h2 class="section-title">بسيط وواضح</h2>
+          <p class="section-desc" style="margin-inline: auto;">
+            من غير تعقيد. تفتح، تتكلم، والشغل يتحرك.
+          </p>
+        </div>
+
+        <div class="how-steps">
+          <div class="step">
+            <div class="step-num">٠١</div>
+            <h3>تدخل المكتب</h3>
+            <p>تفتح دوّار وتشوف فريقك موجود ومستني تعليماتك.</p>
+          </div>
+          <div class="step">
+            <div class="step-num">٠٢</div>
+            <h3>تتكلم بالمصري</h3>
+            <p>تقول اللي محتاجه بالطريقة العادية. هما بيفهموا ويقسموا الشغل.</p>
+          </div>
+          <div class="step">
+            <div class="step-num">٠٣</div>
+            <h3>الشغل يتحرك</h3>
+            <p>كل واحد بياخد الجزء بتاعه، وبتتابع كل حاجة من مكان واحد.</p>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- TEAM -->
+    <section class="team" id="team">
+      <div class="container">
+        <div style="text-align: center; max-width: 36ch; margin-inline: auto;">
+          <span class="section-label">الفريق</span>
+          <h2 class="section-title">ست متخصصين، جاهزين</h2>
+          <p class="section-desc" style="margin-inline: auto;">
+            كل واحد ليه دور واضح. بيتكلموا مع بعض وبيشتغلوا كفريق واحد.
+          </p>
+        </div>
+
+        <div class="team-grid">
+          <div class="member">
+            <div class="member-avatar">م</div>
+            <h3>محتوى</h3>
+            <div class="role">كتابة ومحتوى</div>
+          </div>
+          <div class="member">
+            <div class="member-avatar">ت</div>
+            <h3>تسويق</h3>
+            <div class="role">حملات ووجود أونلاين</div>
+          </div>
+          <div class="member">
+            <div class="member-avatar">خ</div>
+            <h3>خدمة عملاء</h3>
+            <div class="role">رد ومتابعة</div>
+          </div>
+          <div class="member">
+            <div class="member-avatar">ت</div>
+            <h3>تصميم</h3>
+            <div class="role">هوية ومرئيات</div>
+          </div>
+          <div class="member">
+            <div class="member-avatar">ح</div>
+            <h3>حسابات</h3>
+            <div class="role">متابعة وتنظيم</div>
+          </div>
+          <div class="member">
+            <div class="member-avatar">ت</div>
+            <h3>تشغيل</h3>
+            <div class="role">تنسيق ومتابعة</div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- WHY -->
+    <section id="why">
+      <div class="container">
+        <div style="text-align: center; max-width: 36ch; margin-inline: auto;">
+          <span class="section-label">ليه دوّار</span>
+          <h2 class="section-title">مصمم ليك أنت</h2>
+          <p class="section-desc" style="margin-inline: auto;">
+            لأصحاب المشاريع الصغيرة والمتاجر والفريلانسرز في مصر.
+          </p>
+        </div>
+
+        <div class="why-list">
+          <div class="why-item">
+            <div class="why-icon">
+              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 2v4M12 18v4M4.93 4.93l2.83 2.83M16.24 16.24l2.83 2.83M2 12h4M18 12h4M4.93 19.07l2.83-2.83M16.24 7.76l2.83-2.83"/></svg>
+            </div>
+            <div>
+              <h3>كل حاجة من مكان واحد</h3>
+              <p>مفيش تنقل بين أدوات كتير. الفريق والمهام والمتابعة في حتة واحدة.</p>
+            </div>
+          </div>
+          <div class="why-item">
+            <div class="why-icon">
+              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
+            </div>
+            <div>
+              <h3>تتكلم بالمصري</h3>
+              <p>مفيش مصطلحات معقدة. بتقول اللي محتاجه بالطريقة اللي متعود عليها.</p>
+            </div>
+          </div>
+          <div class="why-item">
+            <div class="why-icon">
+              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/></svg>
+            </div>
+            <div>
+              <h3>فريق حاضر دايمًا</h3>
+              <p>مش بتستنى حد يصحى أو يرد. الشغل بيتحرك لما تحتاجه.</p>
+            </div>
+          </div>
+          <div class="why-item">
+            <div class="why-icon">
+              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87M16 3.13a4 4 0 0 1 0 7.75"/></svg>
+            </div>
+            <div>
+              <h3>تخصصات واضحة</h3>
+              <p>كل موظف ليه دور محدد، وبيشتغلوا مع بعض كفريق متكامل.</p>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- CTA -->
+    <section class="cta" id="cta">
+      <div class="container">
+        <div class="cta-box">
+          <h2>جاهز تخلي شغلك داير؟</h2>
+          <p>ابدأ دلوقتي وجرّب دوّار، أو تواصل معانا ونرتبلك اللي يناسبك.</p>
+          <div class="cta-actions">
+            <a href="/office" class="btn btn-primary">جرّب دوّار</a>
+            <a href="mailto:hello@dawwar.app" class="btn btn-ghost">تواصل معانا</a>
+          </div>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <!-- FOOTER -->
+  <footer>
+    <div class="container footer-inner">
+      <a href="#" class="logo">
+        <svg class="logo-mark" viewBox="0 0 48 48" fill="none" xmlns="http://www.w3.org/2000/svg">
+          <defs>
+            <linearGradient id="g2" x1="0%" y1="0%" x2="100%" y2="100%">
+              <stop offset="0%" stop-color="#25BFAE"/>
+              <stop offset="100%" stop-color="#42D6C4"/>
+            </linearGradient>
+          </defs>
+          <path d="M24 6C14.06 6 6 14.06 6 24s8.06 18 18 18 18-8.06 18-18" stroke="url(#g2)" stroke-width="4.5" stroke-linecap="round" fill="none"/>
+          <path d="M38 14 L42 10 L38 6" stroke="url(#g2)" stroke-width="4.5" stroke-linecap="round" stroke-linejoin="round" fill="none"/>
+        </svg>
+        <span class="logo-text">Dawwar <span>دوّار</span></span>
+      </a>
+      <p class="footer-tag">شغلك داير، وفريقك حاضر.</p>
+      <p class="footer-copy">© ٢٠٢٦ دوّار. كل الحقوق محفوظة.</p>
+    </div>
+  </footer>
+
+  <script>
+    const menuBtn = document.getElementById('menuBtn');
+    const mobileMenu = document.getElementById('mobileMenu');
+
+    menuBtn.addEventListener('click', () => {
+      mobileMenu.classList.toggle('open');
+    });
+
+    function closeMenu() {
+      mobileMenu.classList.remove('open');
+    }
+
+    // Close on escape
+    document.addEventListener('keydown', (e) => {
+      if (e.key === 'Escape') closeMenu();
+    });
+  </script>
+</body>
 </html>
