@@ -1,4 +1,6 @@
-# ISystem — AI Workforce Platform
+# Dawwar (دوّار) — AI Workforce Platform
+
+> شغلك داير، وفريقك حاضر. Dawwar is a NEXLOVA product: a virtual AI company in a 3D office. The Arabic landing page is the site entry (`client/index.html`); the office app lives at `/office` (`client/office.html`). The Vercel project is `dawwar` and the product branding is Dawwar everywhere.
 
 A full-screen, isometric 3D office simulation for managing a team of AI employees. The main interaction is the office floor itself: select an employee in the scene to open their profile, chat with them, assign work, inspect their output, or invite them to a meeting.
 

@@ -26,7 +26,7 @@ function decrypt(value) {
 }
 const hash = value => crypto.createHash('sha256').update(value).digest('hex');
 const graph = path => `https://graph.facebook.com/${GRAPH_VERSION}/${path.replace(/^\//, '')}`;
-const html = (res, status, title, message) => res.status(status).type('html').send(`<!doctype html><html><meta charset="utf-8"><meta name="viewport" content="width=device-width"><title>${title}</title><body style="font:16px system-ui;max-width:640px;margin:12vh auto;padding:24px;color:#18202a"><h2>${title}</h2><p>${String(message).replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]))}</p><p>You can close this tab and return to ISystem.</p></body></html>`);
+const html = (res, status, title, message) => res.status(status).type('html').send(`<!doctype html><html><meta charset="utf-8"><meta name="viewport" content="width=device-width"><title>${title}</title><body style="font:16px system-ui;max-width:640px;margin:12vh auto;padding:24px;color:#18202a"><h2>${title}</h2><p>${String(message).replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]))}</p><p>You can close this tab and return to Dawwar.</p></body></html>`);
 
 async function exchangeCode(code) {
   const url = new URL(graph('oauth/access_token'));
@@ -74,7 +74,7 @@ export function registerInstagramRoutes(app) {
       const state = String(req.query.state || '');
       if (!code || !state) return html(res, 400, 'Instagram connection failed', 'The authorization response was incomplete.');
       const consumed = await queryDb('DELETE FROM social_oauth_states WHERE state_hash = $1 AND platform = $2 AND expires_at > NOW() RETURNING state_hash', [hash(state), 'instagram']);
-      if (!consumed.rowCount) return html(res, 400, 'Instagram connection expired', 'Please return to ISystem and start the connection again.');
+      if (!consumed.rowCount) return html(res, 400, 'Instagram connection expired', 'Please return to Dawwar and start the connection again.');
       if (!appId() || !appSecret() || !configId()) return html(res, 503, 'Instagram is not configured', 'Meta Unified Login credentials are missing from the server configuration.');
       const token = await exchangeCode(code);
       const profile = await getInstagramAccount(token.access_token);

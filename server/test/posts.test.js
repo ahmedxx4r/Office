@@ -13,15 +13,15 @@ globalThis.fetch = async (_url, options) => {
   const { query, variables } = JSON.parse(options.body);
   calls.push({ query, variables });
   const ok = data => ({ ok: true, status: 200, json: async () => ({ data }) });
-  if (query.includes('ISystemBufferPublishTargets')) return ok({ account: { organizations: [{ id: 'org1', name: 'Nexlova' }] } });
-  if (query.includes('ISystemBufferPublishChannels')) return ok({ channels: [
+  if (query.includes('DawwarBufferPublishTargets')) return ok({ account: { organizations: [{ id: 'org1', name: 'Nexlova' }] } });
+  if (query.includes('DawwarBufferPublishChannels')) return ok({ channels: [
     { id: 'ch-fb', name: 'NEXLOVA FB', service: 'facebook', isDisconnected: false },
     { id: 'ch-ig', name: 'NEXLOVA IG', service: 'instagram', isDisconnected: false }] });
-  if (query.includes('ISystemCreatePost')) {
+  if (query.includes('DawwarCreatePost')) {
     if (failNextCreates > 0) { failNextCreates -= 1; return { ok: false, status: failStatus, json: async () => ({ errors: [{ message: 'temporary failure' }] }) }; }
     return ok({ createPost: { post: { id: 'buf-' + calls.length, text: variables.input.text, status: nextBufferStatus, dueAt: variables.input.dueAt || null, externalLink: null } } });
   }
-  if (query.includes('ISystemDeletePost')) {
+  if (query.includes('DawwarDeletePost')) {
     if (deleteShouldFail) return { ok: false, status: 500, json: async () => ({ errors: [{ message: 'delete failed' }] }) };
     return ok({ deletePost: { __typename: 'DeletePostSuccess' } });
   }
@@ -58,7 +58,7 @@ test('Publish Now sends shareNow and stores the Buffer result', async () => {
   assert.equal(r.ok, true);
   assert.equal(r.post.status, STATUS.Published);
   assert.ok(r.post.bufferPostId);
-  const create = calls.find(c => c.query.includes('ISystemCreatePost'));
+  const create = calls.find(c => c.query.includes('DawwarCreatePost'));
   assert.equal(create.variables.input.mode, 'shareNow');
 });
 
@@ -66,14 +66,14 @@ test('Queue sends addToQueue and ends as Scheduled', async () => {
   reset();
   const [r] = await createPosts({ text: 'Queue test 1', services: ['facebook'], mode: 'queue' });
   assert.equal(r.post.status, STATUS.Scheduled);
-  assert.equal(calls.find(c => c.query.includes('ISystemCreatePost')).variables.input.mode, 'addToQueue');
+  assert.equal(calls.find(c => c.query.includes('DawwarCreatePost')).variables.input.mode, 'addToQueue');
 });
 
 test('Schedule sends customScheduled with the UTC time converted from Cairo', async () => {
   reset();
   const [r] = await createPosts({ text: 'Schedule test 1', services: ['facebook'], mode: 'schedule', scheduledFor: '2099-11-21 21:30' });
   assert.equal(r.post.status, STATUS.Scheduled);
-  const input = calls.find(c => c.query.includes('ISystemCreatePost')).variables.input;
+  const input = calls.find(c => c.query.includes('DawwarCreatePost')).variables.input;
   assert.equal(input.mode, 'customScheduled');
   assert.equal(input.dueAt, '2099-11-21T19:30:00.000Z');
 });
@@ -134,8 +134,8 @@ test('editing a scheduled post replaces it in Buffer', async () => {
   const edited = await editPost(r.post.id, { text: 'Edit test updated', scheduledFor: '2099-11-22 10:00' });
   assert.equal(edited.status, STATUS.Scheduled);
   assert.equal(edited.text, 'Edit test updated');
-  assert.ok(calls.some(c => c.query.includes('ISystemDeletePost') && c.variables.input.id === oldBufferId));
-  const lastCreate = calls.filter(c => c.query.includes('ISystemCreatePost')).at(-1).variables.input;
+  assert.ok(calls.some(c => c.query.includes('DawwarDeletePost') && c.variables.input.id === oldBufferId));
+  const lastCreate = calls.filter(c => c.query.includes('DawwarCreatePost')).at(-1).variables.input;
   assert.equal(lastCreate.dueAt, '2099-11-22T08:00:00.000Z');
 });
 
