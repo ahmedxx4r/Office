@@ -38,7 +38,7 @@ export async function initStore() {
     } catch (err) {
       pool = null;
       console.error('[store] PostgreSQL unavailable:', err.message);
-      if (process.env.VERCEL === '1') throw new Error('ISystem requires its Supabase PostgreSQL connection in production: ' + err.message);
+      if (process.env.VERCEL === '1') throw new Error('Dawwar requires its Supabase PostgreSQL connection in production: ' + err.message);
       loadJson();
     }
   } else loadJson();
