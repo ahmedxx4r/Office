@@ -16,7 +16,7 @@ Create a GitHub repository named **office** (empty repository; do not add a seco
 ```powershell
 git init
 git add .
-git commit -m "Initial ISystem"
+git commit -m "Initial Dawwar"
 git branch -M main
 git remote add origin https://github.com/YOUR_GITHUB_USERNAME/office.git
 git push -u origin main
